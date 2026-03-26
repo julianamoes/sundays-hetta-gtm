@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sundays & Hetta — GTM Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --dark:#2c2c2c;--bg:#f2f2f2;--white:#fff;--gray:#837e7e;--gray2:#6d757b;
+  --red:#e9596a;--green:#2a9d5c;--amber:#e07b00;
+  --sun:#b8621a;--sunbg:#fff4e0;
+  --het:#1a6b8c;--hetbg:#e0f3fa;
+  --jan:#1e40af;--janbg:#dbeafe;
+  --mar:#065f46;--marbg:#d1fae5;
+  --sep:#5b21b6;--sepbg:#ede9fe;
+  --r:10px;--rs:6px;--t:.2s ease;--sh:0 2px 10px rgba(0,0,0,.07);--sh2:0 4px 24px rgba(0,0,0,.11);
+}
+body{font-family:'Jost',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--dark);font-size:14px;line-height:1.5;letter-spacing:.02em;min-height:100vh}
+.site-header{background:var(--white);padding:0 2rem;position:sticky;top:0;z-index:200;border-bottom:1.5px solid var(--dark)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;height:68px;max-width:1600px;margin:0 auto}
+.brand{display:flex;flex-direction:column;gap:3px}
+.brand-logos{display:flex;align-items:center;gap:8px;line-height:1}
+.brand-sun{font-size:1.05rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--sun)}
+.brand-amp{font-size:.85rem;font-weight:400;color:var(--gray);letter-spacing:.05em}
+.brand-het{font-size:1.05rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--het)}
+.brand-subtitle{font-size:.62rem;font-weight:400;letter-spacing:.12em;color:var(--gray);text-transform:uppercase}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.last-updated{font-size:.62rem;font-weight:400;letter-spacing:.06em;color:var(--gray);text-transform:uppercase}
+.today-chip{background:var(--bg);border:1px solid #d8d8d8;border-radius:4px;padding:4px 12px;font-size:.7rem;letter-spacing:.05em;color:var(--dark);font-weight:500}
+.drop-nav{background:var(--white);border-bottom:2px solid #eaeaea;padding:0 2rem;position:sticky;top:69px;z-index:199;overflow-x:auto}
+.drop-tabs{display:flex;max-width:1600px;margin:0 auto;align-items:center}
+.drop-tab{padding:.85rem 1.2rem;font-size:.75rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--gray);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;transition:var(--t);white-space:nowrap;flex-shrink:0}
+.drop-tab:hover{color:var(--dark)}
+.drop-tab.active{color:var(--dark);border-bottom-color:var(--dark)}
+.nav-divider{width:1px;height:24px;background:#e0e0e0;margin:0 6px;flex-shrink:0}
+.toolbar{background:var(--white);border-bottom:1px solid #eaeaea;padding:.65rem 2rem}
+.toolbar-inner{display:flex;align-items:center;gap:.65rem;max-width:1600px;margin:0 auto;flex-wrap:wrap}
+.search-wrap{flex:1;min-width:160px;max-width:260px;position:relative}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--gray);pointer-events:none}
+.search-input{width:100%;padding:7px 12px 7px 34px;border:1px solid #e0e0e0;border-radius:var(--r);font-size:.83rem;font-family:inherit;background:var(--bg);outline:none;transition:var(--t)}
+.search-input:focus{border-color:var(--dark);background:var(--white)}
+.filter-select{padding:7px 28px 7px 11px;border:1px solid #e0e0e0;border-radius:var(--r);font-size:.8rem;font-family:inherit;background:var(--bg);color:var(--dark);outline:none;cursor:pointer;transition:var(--t);-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23837e7e' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}
+.filter-select:focus{border-color:var(--dark);background-color:var(--white)}
+.toolbar-spacer{flex:1}
+.brand-toggle{display:flex;border:1.5px solid #e0e0e0;border-radius:20px;overflow:hidden;flex-shrink:0}
+.brand-btn{padding:6px 14px;font-size:.73rem;font-weight:600;font-family:inherit;background:none;border:none;cursor:pointer;color:var(--gray);transition:var(--t);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.brand-btn.ab{background:var(--dark);color:#fff}
+.brand-btn.as{background:var(--sun);color:#fff}
+.brand-btn.ah{background:var(--het);color:#fff}
+.brand-btn:not(.ab):not(.as):not(.ah):hover{background:var(--bg)}
+.view-toggle{display:flex;border:1px solid #e0e0e0;border-radius:var(--r);overflow:hidden;flex-shrink:0}
+.view-btn{padding:7px 13px;font-size:.8rem;font-weight:500;font-family:inherit;background:none;border:none;cursor:pointer;color:var(--gray);transition:var(--t);display:flex;align-items:center;gap:5px}
+.view-btn.active{background:var(--dark);color:var(--white)}
+.view-btn:not(.active):hover{background:var(--bg)}
+.drop-toggle-group{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.dtoggle{display:flex;align-items:center;gap:5px;font-size:.73rem;font-weight:600;cursor:pointer;user-select:none;padding:5px 10px;border-radius:20px;border:2px solid transparent;transition:var(--t)}
+.dtoggle input{display:none}
+.dtoggle-JAN_DROP{color:var(--jan);background:var(--janbg);border-color:var(--janbg)}
+.dtoggle-JAN_DROP.off{background:#f0f0f0;color:var(--gray);border-color:#e0e0e0}
+.dtoggle-MARCH_DROP{color:var(--mar);background:var(--marbg);border-color:var(--marbg)}
+.dtoggle-MARCH_DROP.off{background:#f0f0f0;color:var(--gray);border-color:#e0e0e0}
+.dtoggle-SEPT_DROP{color:var(--sep);background:var(--sepbg);border-color:var(--sepbg)}
+.dtoggle-SEPT_DROP.off{background:#f0f0f0;color:var(--gray);border-color:#e0e0e0}
+.main{max-width:1600px;margin:0 auto;padding:1.4rem 2rem}
+.summary-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;gap:1rem;flex-wrap:wrap}
+.results-count{font-size:.78rem;color:var(--gray);font-weight:500}
+.dates-note{font-size:.7rem;color:var(--gray);background:var(--white);border:1px solid #e4e4e4;border-radius:4px;padding:3px 10px;letter-spacing:.03em;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.legend{display:flex;gap:.9rem;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--gray2);font-weight:500}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:.67rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.badge-CHECKPOINT{background:#fde8ea;color:#b02a37}
+.badge-STEP{background:#ebebeb;color:#444}
+.badge-DEADLINE{background:#fef3e0;color:#8b5000}
+.badge-MEETING{background:#dbeafe;color:#1e4f8a}
+.badge-default{background:#f0f0f0;color:#666}
+.drop-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+.drop-badge-JAN_DROP{background:var(--janbg);color:var(--jan)}
+.drop-badge-MARCH_DROP{background:var(--marbg);color:var(--mar)}
+.drop-badge-SEPT_DROP{background:var(--sepbg);color:var(--sep)}
+.brand-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+.brand-badge-SUNDAYS{background:var(--sunbg);color:var(--sun)}
+.brand-badge-HETTA{background:var(--hetbg);color:var(--het)}
+.table-wrap{background:var(--white);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.gtm-table{width:100%;border-collapse:collapse}
+.gtm-table thead th{padding:9px 13px;text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gray2);background:#f7f7f7;border-bottom:1px solid #eaeaea;white-space:nowrap;cursor:pointer;user-select:none;transition:color var(--t)}
+.gtm-table thead th:hover{color:var(--dark)}
+.gtm-table thead th.sort-asc::after{content:' ↑';color:var(--dark)}
+.gtm-table thead th.sort-desc::after{content:' ↓';color:var(--dark)}
+.gtm-table thead th.sun-col{background:#fffbf2;color:var(--sun)}
+.gtm-table thead th.het-col{background:#f0f8fd;color:var(--het)}
+.gtm-table tbody tr{border-bottom:1px solid #f2f2f2;transition:background var(--t)}
+.gtm-table tbody tr:last-child{border-bottom:none}
+.gtm-table tbody tr:hover{background:#fafafa}
+.gtm-table td{padding:8px 13px;vertical-align:middle;font-size:.84rem}
+.td-title{font-weight:600;max-width:220px}
+.td-stage{font-size:.78rem;color:var(--gray);font-weight:500;white-space:nowrap}
+.td-desc{color:#555;max-width:260px;font-size:.81rem}
+.td-date{white-space:nowrap;font-weight:500;font-size:.81rem}
+.td-date-sun{background:#fffbf2}
+.td-date-het{background:#f0f8fd}
+.td-weeks{text-align:center;font-size:.78rem;color:var(--gray)}
+.td-comment{color:var(--gray);font-size:.77rem;max-width:200px}
+.td-num{text-align:center;font-size:.72rem;color:var(--gray);font-weight:600;width:36px}
+.overdue{color:var(--red)!important;font-weight:600}
+.upcoming{color:#2a6e00;font-weight:600}
+.today-row td:first-child{border-left:3px solid var(--amber)}
+.timeline-wrap{display:flex;flex-direction:column;gap:.5rem}
+.month-group{background:var(--white);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.month-header{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;background:#f7f7f7;border-bottom:1px solid #eaeaea;cursor:pointer;user-select:none;transition:background var(--t)}
+.month-header:hover{background:#f0f0f0}
+.month-label{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dark);display:flex;align-items:center;gap:.5rem}
+.month-count{font-size:.7rem;color:var(--gray);background:#e8e8e8;padding:2px 9px;border-radius:12px;font-weight:600}
+.month-body{padding:0}
+.tl-row{display:grid;grid-template-columns:90px 1fr auto;align-items:start;gap:12px;padding:10px 18px;border-bottom:1px solid #f5f5f5;transition:background var(--t)}
+.tl-row:last-child{border-bottom:none}
+.tl-row:hover{background:#fafafa}
+.tl-date{font-size:.74rem;font-weight:600;color:var(--gray2);padding-top:3px;white-space:nowrap}
+.tl-date.overdue{color:var(--red)}
+.tl-date.upcoming{color:var(--green)}
+.tl-content{display:flex;flex-direction:column;gap:3px}
+.tl-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:2px}
+.tl-title{font-weight:600;font-size:.88rem}
+.tl-desc{font-size:.8rem;color:#555}
+.tl-comment{font-size:.74rem;color:var(--gray);font-style:italic}
+.today-group .month-header{background:#fffce8;border-left:3px solid var(--amber)}
+.today-group .month-label{color:#7a5a00}
+.cal-wrap{background:var(--white);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:#f7f7f7;border-bottom:1px solid #eaeaea}
+.cal-nav-title{font-size:.95rem;font-weight:700}
+.cal-nav-btn{background:none;border:1px solid #e0e0e0;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:.78rem;font-family:inherit;color:var(--gray2);transition:var(--t);font-weight:500}
+.cal-nav-btn:hover{background:var(--dark);color:#fff;border-color:var(--dark)}
+.cal-nav-center{display:flex;align-items:center;gap:.75rem}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-dow{padding:7px 4px;text-align:center;font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gray);background:#fafafa;border-bottom:1px solid #eaeaea;border-right:1px solid #f0f0f0}
+.cal-cell{min-height:90px;padding:5px;border-right:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0;overflow:hidden}
+.cal-cell:nth-child(7n){border-right:none}
+.cal-day-num{font-size:.7rem;font-weight:600;color:var(--gray2);margin-bottom:3px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.cal-day-num.today{background:var(--dark);color:#fff}
+.cal-cell.other-month{background:#fafafa}
+.cal-cell.other-month .cal-day-num{color:#d0d0d0}
+.cal-cell.is-today{background:#fffce8}
+.cal-chip{font-size:.58rem;padding:2px 5px;border-radius:3px;margin-bottom:2px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;font-weight:600;transition:opacity var(--t);line-height:1.4}
+.cal-chip:hover{opacity:.8}
+.cal-chip-SUNDAYS{background:var(--sunbg);color:var(--sun)}
+.cal-chip-HETTA{background:var(--hetbg);color:var(--het)}
+.cal-more{font-size:.56rem;color:var(--gray);cursor:pointer;padding:1px 3px;font-weight:500}
+.cal-detail{background:var(--white);border-radius:var(--r);box-shadow:var(--sh2);padding:1.2rem 1.5rem;margin-top:1rem;border-left:4px solid var(--dark);animation:fadeUp .15s ease both}
+.cal-detail-title{font-weight:700;font-size:.92rem;margin-bottom:.4rem}
+.cal-detail-meta{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
+.cal-detail-desc{font-size:.83rem;color:#555;margin-bottom:.4rem}
+.cal-detail-close{float:right;background:none;border:none;cursor:pointer;color:var(--gray);font-size:1rem;margin-left:1rem;line-height:1}
+.empty-state{padding:4rem 2rem;text-align:center;background:var(--white);border-radius:var(--r);box-shadow:var(--sh)}
+.empty-state h3{font-size:1.05rem;margin-bottom:.4rem}
+.empty-state p{color:var(--gray);font-size:.88rem}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeUp .18s ease both}
+@media(max-width:900px){
+  .site-header,.drop-nav,.toolbar{padding-left:1rem;padding-right:1rem}
+  .main{padding:1rem}
+  .td-desc,.td-weeks,.td-comment{display:none}
+  .tl-row{grid-template-columns:72px 1fr}
+  .cal-cell{min-height:56px}
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-logos">
+        <span class="brand-sun">Sundays</span>
+        <span class="brand-amp">&amp;</span>
+        <span class="brand-het">Hetta</span>
+      </div>
+      <span class="brand-subtitle">Go-to-Market Calendar</span>
+    </div>
+    <div class="header-right">
+      <span class="today-chip" id="today-chip"></span>
+      <span class="last-updated">Last updated: March 26, 2026</span>
+    </div>
+  </div>
+</header>
+<nav class="drop-nav">
+  <div class="drop-tabs">
+    <button class="drop-tab active" data-tab="SEPT_DROP">Sept Drop</button>
+    <button class="drop-tab" data-tab="JAN_DROP">Jan Drop</button>
+    <button class="drop-tab" data-tab="MARCH_DROP">March Drop</button>
+    <div class="nav-divider"></div>
+    <button class="drop-tab" data-tab="STEPS">&#9776; Steps</button>
+    <button class="drop-tab" data-tab="OVERLAP">&#8660; Overlap</button>
+    <button class="drop-tab" data-tab="CALENDAR">&#128197; Calendar</button>
+  </div>
+</nav>
+<div class="toolbar" id="toolbar">
+  <div class="toolbar-inner" id="toolbar-inner"></div>
+</div>
+<div class="main">
+  <div class="summary-bar" id="summary-bar">
+    <span class="results-count" id="results-count"></span>
+    <span class="dates-note">&#128197; Dates shown are the Monday of that week</span>
+    <div class="legend" id="legend"></div>
+  </div>
+  <div id="view-content"></div>
+</div>
+<script>
+const DATA = {"JAN_DROP": [{"step": 1, "type": "CHECKPOINT", "stage": "PSR", "title": "POST-SEASON REVIEW", "description": "Cross-functional leadership review of past season performance to identify opportunities for future season development", "comments": "Jan and Sept drops only", "sundays": {"weeks": -70, "date": "2025-09-08T00:00:00"}, "hetta": {"weeks": -74, "date": "2025-08-25T00:00:00"}}, {"step": 2, "type": "CHECKPOINT", "stage": "CSR", "title": "CATEGORY  SALES REVIEW", "description": "Detailed sales and product review by category to confirm which items to CO and identify opportunities for future season development", "comments": null, "sundays": {"weeks": -69, "date": "2025-09-15T00:00:00"}, "hetta": {"weeks": -73, "date": "2025-09-01T00:00:00"}}, {"step": 3, "type": "DEADLINE", "stage": null, "title": "INITIAL FUNCTION PLAN REVIEW", "description": "Review/workshop initial assortment plan by category", "comments": null, "sundays": {"weeks": -67, "date": "2025-09-29T00:00:00"}, "hetta": {"weeks": -71, "date": "2025-09-15T00:00:00"}}, {"step": 4, "type": "STEP", "stage": null, "title": "TREND & MARKETPLACE REVIEW", "description": "Overview of prioritized Design and Competitor trends by category to identify opportunities for future season development", "comments": null, "sundays": {"weeks": -67, "date": "2025-09-29T00:00:00"}, "hetta": {"weeks": -71, "date": "2025-09-15T00:00:00"}}, {"step": 5, "type": "STEP", "stage": null, "title": "CATEGORY  LINE PLANNING", "description": "Product team prepares initial assortment plan by category based on top-down initial function plan and key Design and Competitor trends by category", "comments": "does this need to move out?", "sundays": {"weeks": -67, "date": "2025-09-29T00:00:00"}, "hetta": {"weeks": -71, "date": "2025-09-15T00:00:00"}}, {"step": 6, "type": "STEP", "stage": null, "title": "CARRYOVER REVIEW", "description": "Review areas of opportunity for top selling carryover items and franchises to drive sales", "comments": null, "sundays": {"weeks": -67, "date": "2025-09-29T00:00:00"}, "hetta": {"weeks": -71, "date": "2025-09-15T00:00:00"}}, {"step": 7, "type": "CHECKPOINT", "stage": null, "title": "PRODUCT STRATEGY", "description": "Approve proposed assortment plan by category, inclusive of number of developments by price and function for development", "comments": null, "sundays": {"weeks": -65, "date": "2025-10-13T00:00:00"}, "hetta": {"weeks": -69, "date": "2025-09-29T00:00:00"}}, {"step": 8, "type": "DEADLINE", "stage": null, "title": "FUNCTION PLAN FINALIZED", "description": "Final function plan confirmed", "comments": null, "sundays": {"weeks": -65, "date": "2025-10-13T00:00:00"}, "hetta": {"weeks": -69, "date": "2025-09-29T00:00:00"}}, {"step": 9, "type": "STEP", "stage": null, "title": "CATEGORY BRIEF TO DESIGNERS", "description": "Designers are briefed on Product strategy and key focus areas/needs from Vendors for the season", "comments": "ADDED // Category brief should be to designers too. Not just factories.", "sundays": {"weeks": -64, "date": "2025-10-20T00:00:00"}, "hetta": {"weeks": -68, "date": "2025-10-06T00:00:00"}}, {"step": 10, "type": "DEADLINE", "stage": null, "title": "INITIAL DESIGNS COMPLETED", "description": "Design completes sketches of each item for review", "comments": null, "sundays": {"weeks": -58, "date": "2025-12-01T00:00:00"}, "hetta": {"weeks": -62, "date": "2025-11-17T00:00:00"}}, {"step": 11, "type": "STEP", "stage": null, "title": "CATEGORY BRIEF TO VENDORS", "description": "Vendors are briefed on designs for the season", "comments": null, "sundays": {"weeks": -58, "date": "2025-12-01T00:00:00"}, "hetta": {"weeks": -62, "date": "2025-11-17T00:00:00"}}, {"step": 12, "type": "DEADLINE", "stage": null, "title": "QUOTATION - START", "description": "Initial quotations requested from vendors", "comments": null, "sundays": {"weeks": -58, "date": "2025-12-01T00:00:00"}, "hetta": {"weeks": -62, "date": "2025-11-17T00:00:00"}}, {"step": 13, "type": "DEADLINE", "stage": null, "title": "QUOTATION - END", "description": "Initial quotations received from Vendors", "comments": "3 weeks from requesting", "sundays": {"weeks": -55, "date": "2025-12-22T00:00:00"}, "hetta": {"weeks": -59, "date": "2025-12-08T00:00:00"}}, {"step": 14, "type": "DEADLINE", "stage": null, "title": "LINE PLAN CREATED", "description": "Line plan by category is created", "comments": null, "sundays": {"weeks": -54, "date": "2025-12-29T00:00:00"}, "hetta": {"weeks": -58, "date": "2025-12-15T00:00:00"}}, {"step": 15, "type": "CHECKPOINT", "stage": null, "title": "PRODUCT PLAN", "description": "Approve CO improvements, program builds and net new designs by category for the season", "comments": null, "sundays": {"weeks": -50, "date": "2026-01-26T00:00:00"}, "hetta": {"weeks": -54, "date": "2026-01-12T00:00:00"}}, {"step": 16, "type": "DEADLINE", "stage": "SAMPLE", "title": "SAMPLE TOF CREATED", "description": "Product Development creates initial TOF/specifications sheet for Products proposed for development", "comments": null, "sundays": {"weeks": -49, "date": "2026-02-02T00:00:00"}, "hetta": {"weeks": -53, "date": "2026-01-19T00:00:00"}}, {"step": 17, "type": "STEP", "stage": "SAMPLE", "title": "SAMPLE SKU CREATED", "description": "Sample SKU is created in the system by Data Team", "comments": "3 weeks for Data Team to process", "sundays": {"weeks": -46, "date": "2026-02-23T00:00:00"}, "hetta": {"weeks": -50, "date": "2026-02-09T00:00:00"}}, {"step": 18, "type": "DEADLINE", "stage": "SAMPLE", "title": "SAMPLE PO PASSED", "description": "Sample PO passed to vendor for execution", "comments": null, "sundays": {"weeks": -46, "date": "2026-02-23T00:00:00"}, "hetta": {"weeks": -50, "date": "2026-02-09T00:00:00"}}, {"step": 19, "type": "STEP", "stage": "SAMPLE", "title": "FIRST SAMPLE QC REVIEW", "description": "QC report is completed at vendor for review", "comments": "6 weeks for samples to be ready for QC review", "sundays": {"weeks": -40, "date": "2026-04-06T00:00:00"}, "hetta": {"weeks": -44, "date": "2026-03-23T00:00:00"}}, {"step": 20, "type": "STEP", "stage": "SAMPLE", "title": "FIRST SAMPLE PRODUCT DEVELOPMENT REVIEW", "description": "Product Development reviews sample and provides comments/feedback for adjustments", "comments": null, "sundays": {"weeks": -39, "date": "2026-04-13T00:00:00"}, "hetta": {"weeks": -43, "date": "2026-03-30T00:00:00"}}, {"step": 21, "type": "CHECKPOINT", "stage": "SAMPLE", "title": "DROP CONFIRMATION", "description": "Full DROP assortment confirmed and presented to cross-functional partners.", "comments": null, "sundays": {"weeks": -37, "date": "2026-04-27T00:00:00"}, "hetta": {"weeks": -41, "date": "2026-04-13T00:00:00"}}, {"step": 22, "type": "STEP", "stage": "SAMPLE", "title": "CAMPAIGN SAMPLE CONFIRMATION", "description": "Confirm which products we need to order for campaigns", "comments": null, "sundays": {"weeks": -36, "date": "2026-05-04T00:00:00"}, "hetta": {"weeks": -40, "date": "2026-04-20T00:00:00"}}, {"step": 23, "type": "DEADLINE", "stage": "SAMPLE", "title": "CAMPAIGN SAMPLE SHIP", "description": "Samples for campaign ship from vendor", "comments": null, "sundays": {"weeks": -35, "date": "2026-05-11T00:00:00"}, "hetta": {"weeks": -39, "date": "2026-04-27T00:00:00"}}, {"step": 24, "type": "STEP", "stage": "SAMPLE", "title": "SECOND SAMPLE QC REVIEW", "description": "QC report is completed at vendor for review", "comments": null, "sundays": {"weeks": -32, "date": "2026-06-01T00:00:00"}, "hetta": {"weeks": -36, "date": "2026-05-18T00:00:00"}}, {"step": 25, "type": "STEP", "stage": "SAMPLE", "title": "SECOND SAMPLE PRODUCT DEVELOPMENT REVIEW", "description": "Product Development reviews sample and provides comments/feedback for adjustments", "comments": null, "sundays": {"weeks": -31, "date": "2026-06-08T00:00:00"}, "hetta": {"weeks": -35, "date": "2026-05-25T00:00:00"}}, {"step": 26, "type": "DEADLINE", "stage": "SAMPLE", "title": "FINAL PRODUCT APPROVAL", "description": "All aspects of product are approved to proceed", "comments": null, "sundays": {"weeks": -30, "date": "2026-06-15T00:00:00"}, "hetta": {"weeks": -34, "date": "2026-06-01T00:00:00"}}, {"step": 27, "type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCT DATA FORM - START", "description": "All product data is completed and finalized", "comments": null, "sundays": {"weeks": -29, "date": "2026-06-22T00:00:00"}, "hetta": {"weeks": -32, "date": "2026-06-15T00:00:00"}}, {"step": 28, "type": "DEADLINE", "stage": "PRODUCTION", "title": "AI AND DIAGRAMS - START", "description": "AIs are be created and submitted for review after a final sample has been approved.", "comments": null, "sundays": {"weeks": -29, "date": "2026-06-22T00:00:00"}, "hetta": {"weeks": -32, "date": "2026-06-15T00:00:00"}}, {"step": 29, "type": "DEADLINE", "stage": "SAMPLE", "title": "SILO IMAGE - START", "description": "Images of approved sample are captured by vendor and submitted for review by the PD team.", "comments": null, "sundays": {"weeks": -29, "date": "2026-06-22T00:00:00"}, "hetta": {"weeks": -32, "date": "2026-06-15T00:00:00"}}, {"step": 30, "type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCTION TOF SENT TO DATA", "description": "Production TOF is submitted to be processed by Data Team.", "comments": null, "sundays": {"weeks": -29, "date": "2026-06-22T00:00:00"}, "hetta": {"weeks": -32, "date": "2026-06-15T00:00:00"}}, {"step": 31, "type": "DEADLINE", "stage": "PRODUCTION", "title": "FINISHED GOODS PO PASSED TO CHINA OFFICE", "description": "Confirmed FG PO's are passed to China Office - NEGOTIADED WITH VENDOR", "comments": null, "sundays": {"weeks": -27, "date": "2026-07-06T00:00:00"}, "hetta": {"weeks": -31, "date": "2026-06-22T00:00:00"}}, {"step": 32, "type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCT DATA FORM - END", "description": "All product data is completed and finalized", "comments": "2 weeks for review", "sundays": {"weeks": -26, "date": "2026-07-13T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-06-29T00:00:00"}}, {"step": 33, "type": "DEADLINE", "stage": "PRODUCTION", "title": "AI AND DIAGRAMS - END", "description": "AIs are be created and submitted for review after a final sample has been approved.", "comments": "2 weeks for review", "sundays": {"weeks": -26, "date": "2026-07-13T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-06-29T00:00:00"}}, {"step": 34, "type": "DEADLINE", "stage": "SAMPLE", "title": "SILO IMAGE - END", "description": "Images of approved sample are captured by vendor and submitted for review by the PD team.", "comments": "3 weeks for review from submission", "sundays": {"weeks": -26, "date": "2026-07-13T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-06-29T00:00:00"}}, {"step": 35, "type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCTION SKU CREATED", "description": "Production SKUs are complete and created in the system.", "comments": "3 weeks for Data team to process from receiving TOF date.", "sundays": {"weeks": -26, "date": "2026-07-13T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-06-29T00:00:00"}}, {"step": 36, "type": "DEADLINE", "stage": "PRODUCTION", "title": "FINISHED GOODS PO PASSED TO VENDORS", "description": "Confirmed FG PO's are passed to vendors", "comments": null, "sundays": {"weeks": -26, "date": "2026-07-13T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-06-29T00:00:00"}}, {"step": 37, "type": "STEP", "stage": "PRODUCTION", "title": "PRODUCTION STARTS", "description": "Finished goods production starts at vendors", "comments": null, "sundays": {"weeks": -26, "date": "2026-07-13T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-06-29T00:00:00"}}, {"step": 38, "type": "STEP", "stage": "PRODUCTION", "title": "CONTAINER PLANNING/OPTIMIZATION", "description": "Distribution Management reviews planned PO's by vendor and region to optimize containers and shipments", "comments": "2 weeks after production sku creation", "sundays": {"weeks": -24, "date": "2026-07-27T00:00:00"}, "hetta": {"weeks": -28, "date": "2026-07-13T00:00:00"}}, {"step": 39, "type": "CHECKPOINT", "stage": null, "title": "CAMPAIGN STRATEGY", "description": "Align on seasonal campaign strategy and shoot plan for launch", "comments": null, "sundays": {"weeks": -17, "date": "2026-09-14T00:00:00"}, "hetta": {"weeks": -21, "date": "2026-08-31T00:00:00"}}, {"step": 40, "type": "DEADLINE", "stage": null, "title": "SILOS UPLOADED TO BRAND FOLDER", "description": "Finalized images are upload to Brandfolder  platform with proper naming convention and tags", "comments": null, "sundays": {"weeks": -15, "date": "2026-09-28T00:00:00"}, "hetta": {"weeks": -19, "date": "2026-09-14T00:00:00"}}, {"step": 41, "type": "CHECKPOINT", "stage": null, "title": "SHOWROOM MERCHANDISING PLAN", "description": "Review merchandising/showroom execution", "comments": null, "sundays": {"weeks": -15, "date": "2026-09-28T00:00:00"}, "hetta": {"weeks": -19, "date": "2026-09-14T00:00:00"}}, {"step": 42, "type": "DEADLINE", "stage": "SAMPLE", "title": "APPROVED CAMPAIGN SAMPLES IN DELTA WHS", "description": "All approved samples required for market are received for use", "comments": null, "sundays": {"weeks": -15, "date": "2026-09-28T00:00:00"}, "hetta": {"weeks": -19, "date": "2026-09-14T00:00:00"}}, {"step": 43, "type": "STEP", "stage": "PRODUCTION", "title": "FINISHED GOODS PRODUCTION COMPLETE", "description": "Finished goods are completed at the vendor", "comments": null, "sundays": {"weeks": -10, "date": "2026-11-02T00:00:00"}, "hetta": {"weeks": -14, "date": "2026-10-19T00:00:00"}}, {"step": 44, "type": "STEP", "stage": "PRODUCTION", "title": "FINISHED GOODS QUALITY INSPECTION", "description": "QC audit on finished goods is completed prior to shipment", "comments": null, "sundays": {"weeks": -9, "date": "2026-11-09T00:00:00"}, "hetta": {"weeks": -13, "date": "2026-10-26T00:00:00"}}, {"step": 45, "type": "DEADLINE", "stage": null, "title": "PRODUCT COPY COMPLETED", "description": "Marketing copy is completed by item", "comments": null, "sundays": {"weeks": -8, "date": "2026-11-16T00:00:00"}, "hetta": {"weeks": -12, "date": "2026-11-02T00:00:00"}}, {"step": 46, "type": "DEADLINE", "stage": null, "title": "CARTON DATA COMPLETED", "description": "Carton data is finalized on  Product Data form", "comments": null, "sundays": {"weeks": -8, "date": "2026-11-16T00:00:00"}, "hetta": {"weeks": -12, "date": "2026-11-02T00:00:00"}}, {"step": 47, "type": "STEP", "stage": "PRODUCTION", "title": "FINISHED GOODS SHIP", "description": "Finished goods exit the vendor", "comments": null, "sundays": {"weeks": -8, "date": "2026-11-16T00:00:00"}, "hetta": {"weeks": -12, "date": "2026-11-02T00:00:00"}}, {"step": 48, "type": "STEP", "stage": "SAMPLE", "title": "CAMPAIGN SHOOT", "description": "Marketing shoots seasonal campagin", "comments": null, "sundays": {"weeks": -8, "date": "2026-11-16T00:00:00"}, "hetta": {"weeks": -12, "date": "2026-11-02T00:00:00"}}, {"step": 49, "type": "DEADLINE", "stage": null, "title": "LIFESTYLE/CAMPAIGN IMAGERY COMPLETED", "description": "Lifestyle and campaign imagery is completed for launch", "comments": null, "sundays": {"weeks": -7, "date": "2026-11-23T00:00:00"}, "hetta": {"weeks": -11, "date": "2026-11-09T00:00:00"}}, {"step": 50, "type": "STEP", "stage": null, "title": "PRICE VALIDATION", "description": "Products prices are confirmed", "comments": null, "sundays": {"weeks": -6, "date": "2026-11-30T00:00:00"}, "hetta": {"weeks": -2, "date": "2027-01-11T00:00:00"}}, {"step": 51, "type": "STEP", "stage": null, "title": "MERCHANDISING", "description": "Merchandising completed for Season Launch", "comments": null, "sundays": {"weeks": -6, "date": "2026-11-30T00:00:00"}, "hetta": {"weeks": -2, "date": "2027-01-11T00:00:00"}}, {"step": 52, "type": "STEP", "stage": null, "title": "PRODUCT BRIEF", "description": "Summary of all products being launched", "comments": null, "sundays": {"weeks": -6, "date": "2026-11-30T00:00:00"}, "hetta": {"weeks": -2, "date": "2027-01-11T00:00:00"}}, {"step": 53, "type": "DEADLINE", "stage": null, "title": "TRADE LAUNCH PREVIEW", "description": "Products are pre-launched with Trade Clients", "comments": null, "sundays": {"weeks": -4, "date": "2026-12-14T00:00:00"}, "hetta": {"weeks": -1, "date": "2027-01-18T00:00:00"}}, {"step": 54, "type": "DEADLINE", "stage": "PRODUCTION", "title": "FINISHED GOODS IN WHS", "description": "Finished goods are received in warehouses", "comments": "same as launch date", "sundays": {"weeks": 0, "date": "2027-01-11T00:00:00"}, "hetta": {"weeks": 4, "date": "2027-02-22T00:00:00"}}, {"step": 55, "type": "STEP", "stage": null, "title": "ECOMERCE QA", "description": "Review ecommerce experince before sharing with rest of the company. Always on Wednesdays", "comments": null, "sundays": {"weeks": 4, "date": "2027-02-08T00:00:00"}, "hetta": {"weeks": 0, "date": "2027-01-25T00:00:00"}}, {"step": 56, "type": "DEADLINE", "stage": null, "title": "SEASON LAUNCH", "description": "Products are launched online and in showrooms to customers", "comments": null, "sundays": {"weeks": 4, "date": "2027-01-11T00:00:00"}, "hetta": {"weeks": 0, "date": "2027-01-25T00:00:00"}}, {"step": 57, "type": "DEADLINE", "stage": null, "title": "SEASON CLOSE", "description": "Season closes when post-season starts for next development season", "comments": null, "sundays": {"weeks": 12, "date": "2027-04-05T00:00:00"}, "hetta": {"weeks": 12, "date": "2027-04-19T00:00:00"}}], "MARCH_DROP": [{"step": 1, "type": "CHECKPOINT", "stage": "PSR", "title": "POST-SEASON REVIEW", "description": "Cross-functional leadership review of past season performance to identify opportunities for future season development", "comments": "Jan and Sept drops only", "sundays": {"weeks": -70, "date": "2025-11-10T00:00:00"}, "hetta": {"weeks": -74, "date": "2025-10-27T00:00:00"}}, {"step": 2, "type": "CHECKPOINT", "stage": "CSR", "title": "CATEGORY  SALES REVIEW", "description": "Detailed sales and product review by category to confirm which items to CO and identify opportunities for future season development", "comments": null, "sundays": {"weeks": -69, "date": "2025-11-17T00:00:00"}, "hetta": {"weeks": -73, "date": "2025-11-03T00:00:00"}}, {"step": 3, "type": "DEADLINE", "stage": null, "title": "INITIAL FUNCTION PLAN REVIEW", "description": "Review/workshop initial assortment plan by category", "comments": null, "sundays": {"weeks": -67, "date": "2025-12-01T00:00:00"}, "hetta": {"weeks": -71, "date": "2025-11-17T00:00:00"}}, {"step": 4, "type": "STEP", "stage": null, "title": "TREND & MARKETPLACE REVIEW", "description": "Overview of prioritized Design and Competitor trends by category to identify opportunities for future season development", "comments": null, "sundays": {"weeks": -67, "date": "2025-12-01T00:00:00"}, "hetta": {"weeks": -71, "date": "2025-11-17T00:00:00"}}, {"step": 5, "type": "STEP", "stage": null, "title": "CATEGORY  LINE PLANNING", "description": "Product team prepares initial assortment plan by category based on top-down initial function plan and key Design and Competitor trends by category", "comments": "does this need to move out?", "sundays": {"weeks": -67, "date": "2025-12-01T00:00:00"}, "hetta": {"weeks": -71, "date": "2025-11-17T00:00:00"}}, {"step": 6, "type": "STEP", "stage": null, "title": "CARRYOVER REVIEW", "description": "Review areas of opportunity for top selling carryover items and franchises to drive sales", "comments": null, "sundays": {"weeks": -67, "date": "2025-12-01T00:00:00"}, "hetta": {"weeks": -71, "date": "2025-11-17T00:00:00"}}, {"step": 7, "type": "CHECKPOINT", "stage": null, "title": "PRODUCT STRATEGY", "description": "Approve proposed assortment plan by category, inclusive of number of developments by price and function for development", "comments": null, "sundays": {"weeks": -65, "date": "2025-12-15T00:00:00"}, "hetta": {"weeks": -69, "date": "2025-12-01T00:00:00"}}, {"step": 8, "type": "DEADLINE", "stage": null, "title": "FUNCTION PLAN FINALIZED", "description": "Final function plan confirmed", "comments": null, "sundays": {"weeks": -65, "date": "2025-12-15T00:00:00"}, "hetta": {"weeks": -69, "date": "2025-12-01T00:00:00"}}, {"step": 9, "type": "STEP", "stage": null, "title": "CATEGORY BRIEF TO DESIGNERS", "description": "Designers are briefed on Product strategy and key focus areas/needs from Vendors for the season", "comments": "ADDED // Category brief should be to designers too. Not just factories.", "sundays": {"weeks": -64, "date": "2025-12-22T00:00:00"}, "hetta": {"weeks": -68, "date": "2025-12-08T00:00:00"}}, {"step": 10, "type": "DEADLINE", "stage": null, "title": "INITIAL DESIGNS COMPLETED", "description": "Design completes sketches of each item for review", "comments": null, "sundays": {"weeks": -58, "date": "2026-02-02T00:00:00"}, "hetta": {"weeks": -62, "date": "2026-01-19T00:00:00"}}, {"step": 11, "type": "STEP", "stage": null, "title": "CATEGORY BRIEF TO VENDORS", "description": "Vendors are briefed on designs for the season", "comments": null, "sundays": {"weeks": -58, "date": "2026-02-02T00:00:00"}, "hetta": {"weeks": -62, "date": "2026-01-19T00:00:00"}}, {"step": 12, "type": "DEADLINE", "stage": null, "title": "QUOTATION - START", "description": "Initial quotations requested from vendors", "comments": null, "sundays": {"weeks": -58, "date": "2026-02-02T00:00:00"}, "hetta": {"weeks": -62, "date": "2026-01-19T00:00:00"}}, {"step": 13, "type": "DEADLINE", "stage": null, "title": "QUOTATION - END", "description": "Initial quotations received from Vendors", "comments": "3 weeks from requesting", "sundays": {"weeks": -55, "date": "2026-02-23T00:00:00"}, "hetta": {"weeks": -59, "date": "2026-02-09T00:00:00"}}, {"step": 14, "type": "DEADLINE", "stage": null, "title": "LINE PLAN CREATED", "description": "Line plan by category is created", "comments": null, "sundays": {"weeks": -54, "date": "2026-03-02T00:00:00"}, "hetta": {"weeks": -58, "date": "2026-02-16T00:00:00"}}, {"step": 15, "type": "CHECKPOINT", "stage": null, "title": "PRODUCT PLAN", "description": "Approve CO improvements, program builds and net new designs by category for the season", "comments": null, "sundays": {"weeks": -50, "date": "2026-03-30T00:00:00"}, "hetta": {"weeks": -54, "date": "2026-03-16T00:00:00"}}, {"step": 16, "type": "DEADLINE", "stage": "SAMPLE", "title": "SAMPLE TOF CREATED", "description": "Product Development creates initial TOF/specifications sheet for Products proposed for development", "comments": null, "sundays": {"weeks": -49, "date": "2026-04-06T00:00:00"}, "hetta": {"weeks": -53, "date": "2026-03-23T00:00:00"}}, {"step": 17, "type": "STEP", "stage": "SAMPLE", "title": "SAMPLE SKU CREATED", "description": "Sample SKU is created in the system by Data Team", "comments": "3 weeks for Data Team to process", "sundays": {"weeks": -46, "date": "2026-04-27T00:00:00"}, "hetta": {"weeks": -50, "date": "2026-04-13T00:00:00"}}, {"step": 18, "type": "DEADLINE", "stage": "SAMPLE", "title": "SAMPLE PO PASSED", "description": "Sample PO passed to vendor for execution", "comments": null, "sundays": {"weeks": -46, "date": "2026-04-27T00:00:00"}, "hetta": {"weeks": -50, "date": "2026-04-13T00:00:00"}}, {"step": 19, "type": "STEP", "stage": "SAMPLE", "title": "FIRST SAMPLE QC REVIEW", "description": "QC report is completed at vendor for review", "comments": "6 weeks for samples to be ready for QC review", "sundays": {"weeks": -40, "date": "2026-06-08T00:00:00"}, "hetta": {"weeks": -44, "date": "2026-05-25T00:00:00"}}, {"step": 20, "type": "STEP", "stage": "SAMPLE", "title": "FIRST SAMPLE PRODUCT DEVELOPMENT REVIEW", "description": "Product Development reviews sample and provides comments/feedback for adjustments", "comments": null, "sundays": {"weeks": -39, "date": "2026-06-15T00:00:00"}, "hetta": {"weeks": -43, "date": "2026-06-01T00:00:00"}}, {"step": 21, "type": "CHECKPOINT", "stage": "SAMPLE", "title": "DROP CONFIRMATION", "description": "Full DROP assortment confirmed and presented to cross-functional partners.", "comments": null, "sundays": {"weeks": -37, "date": "2026-06-29T00:00:00"}, "hetta": {"weeks": -41, "date": "2026-06-15T00:00:00"}}, {"step": 22, "type": "STEP", "stage": "SAMPLE", "title": "CAMPAIGN SAMPLE CONFIRMATION", "description": "Confirm which products we need to order for campaigns", "comments": null, "sundays": {"weeks": -36, "date": "2026-07-06T00:00:00"}, "hetta": {"weeks": -40, "date": "2026-06-22T00:00:00"}}, {"step": 23, "type": "DEADLINE", "stage": "SAMPLE", "title": "CAMPAIGN SAMPLE SHIP", "description": "Samples for campaign ship from vendor", "comments": null, "sundays": {"weeks": -35, "date": "2026-07-13T00:00:00"}, "hetta": {"weeks": -39, "date": "2026-06-29T00:00:00"}}, {"step": 24, "type": "STEP", "stage": "SAMPLE", "title": "SECOND SAMPLE QC REVIEW", "description": "QC report is completed at vendor for review", "comments": null, "sundays": {"weeks": -32, "date": "2026-08-03T00:00:00"}, "hetta": {"weeks": -36, "date": "2026-07-20T00:00:00"}}, {"step": 25, "type": "STEP", "stage": "SAMPLE", "title": "SECOND SAMPLE PRODUCT DEVELOPMENT REVIEW", "description": "Product Development reviews sample and provides comments/feedback for adjustments", "comments": null, "sundays": {"weeks": -31, "date": "2026-08-10T00:00:00"}, "hetta": {"weeks": -35, "date": "2026-07-27T00:00:00"}}, {"step": 26, "type": "DEADLINE", "stage": "SAMPLE", "title": "FINAL PRODUCT APPROVAL", "description": "All aspects of product are approved to proceed", "comments": null, "sundays": {"weeks": -30, "date": "2026-08-17T00:00:00"}, "hetta": {"weeks": -34, "date": "2026-08-03T00:00:00"}}, {"step": 27, "type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCT DATA FORM - START", "description": "All product data is completed and finalized", "comments": null, "sundays": {"weeks": -29, "date": "2026-08-24T00:00:00"}, "hetta": {"weeks": -32, "date": "2026-08-17T00:00:00"}}, {"step": 28, "type": "DEADLINE", "stage": "PRODUCTION", "title": "AI AND DIAGRAMS - START", "description": "AIs are be created and submitted for review after a final sample has been approved.", "comments": null, "sundays": {"weeks": -29, "date": "2026-08-24T00:00:00"}, "hetta": {"weeks": -32, "date": "2026-08-17T00:00:00"}}, {"step": 29, "type": "DEADLINE", "stage": "SAMPLE", "title": "SILO IMAGE - START", "description": "Images of approved sample are captured by vendor and submitted for review by the PD team.", "comments": null, "sundays": {"weeks": -29, "date": "2026-08-24T00:00:00"}, "hetta": {"weeks": -32, "date": "2026-08-17T00:00:00"}}, {"step": 30, "type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCTION TOF SENT TO DATA", "description": "Production TOF is submitted to be processed by Data Team.", "comments": null, "sundays": {"weeks": -29, "date": "2026-08-24T00:00:00"}, "hetta": {"weeks": -32, "date": "2026-08-17T00:00:00"}}, {"step": 31, "type": "DEADLINE", "stage": "PRODUCTION", "title": "FINISHED GOODS PO PASSED TO CHINA OFFICE", "description": "Confirmed FG PO's are passed to China Office - NEGOTIADED WITH VENDOR", "comments": null, "sundays": {"weeks": -27, "date": "2026-09-07T00:00:00"}, "hetta": {"weeks": -31, "date": "2026-08-24T00:00:00"}}, {"step": 32, "type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCT DATA FORM - END", "description": "All product data is completed and finalized", "comments": "2 weeks for review", "sundays": {"weeks": -26, "date": "2026-09-14T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-08-31T00:00:00"}}, {"step": 33, "type": "DEADLINE", "stage": "PRODUCTION", "title": "AI AND DIAGRAMS - END", "description": "AIs are be created and submitted for review after a final sample has been approved.", "comments": "2 weeks for review", "sundays": {"weeks": -26, "date": "2026-09-14T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-08-31T00:00:00"}}, {"step": 34, "type": "DEADLINE", "stage": "SAMPLE", "title": "SILO IMAGE - END", "description": "Images of approved sample are captured by vendor and submitted for review by the PD team.", "comments": "3 weeks for review from submission", "sundays": {"weeks": -26, "date": "2026-09-14T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-08-31T00:00:00"}}, {"step": 35, "type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCTION SKU CREATED", "description": "Production SKUs are complete and created in the system.", "comments": "3 weeks for Data team to process from receiving TOF date.", "sundays": {"weeks": -26, "date": "2026-09-14T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-08-31T00:00:00"}}, {"step": 36, "type": "DEADLINE", "stage": "PRODUCTION", "title": "FINISHED GOODS PO PASSED TO VENDORS", "description": "Confirmed FG PO's are passed to vendors", "comments": null, "sundays": {"weeks": -26, "date": "2026-09-14T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-08-31T00:00:00"}}, {"step": 37, "type": "STEP", "stage": "PRODUCTION", "title": "PRODUCTION STARTS", "description": "Finished goods production starts at vendors", "comments": null, "sundays": {"weeks": -26, "date": "2026-09-14T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-08-31T00:00:00"}}, {"step": 38, "type": "STEP", "stage": "PRODUCTION", "title": "CONTAINER PLANNING/OPTIMIZATION", "description": "Distribution Management reviews planned PO's by vendor and region to optimize containers and shipments", "comments": "2 weeks after production sku creation", "sundays": {"weeks": -24, "date": "2026-09-28T00:00:00"}, "hetta": {"weeks": -28, "date": "2026-09-14T00:00:00"}}, {"step": 39, "type": "CHECKPOINT", "stage": null, "title": "CAMPAIGN STRATEGY", "description": "Align on seasonal campaign strategy and shoot plan for launch", "comments": null, "sundays": {"weeks": -17, "date": "2026-11-16T00:00:00"}, "hetta": {"weeks": -21, "date": "2026-11-02T00:00:00"}}, {"step": 40, "type": "DEADLINE", "stage": null, "title": "SILOS UPLOADED TO BRAND FOLDER", "description": "Finalized images are upload to Brandfolder  platform with proper naming convention and tags", "comments": null, "sundays": {"weeks": -15, "date": "2026-11-30T00:00:00"}, "hetta": {"weeks": -19, "date": "2026-11-16T00:00:00"}}, {"step": 41, "type": "CHECKPOINT", "stage": null, "title": "SHOWROOM MERCHANDISING PLAN", "description": "Review merchandising/showroom execution", "comments": null, "sundays": {"weeks": -15, "date": "2026-11-30T00:00:00"}, "hetta": {"weeks": -19, "date": "2026-11-16T00:00:00"}}, {"step": 42, "type": "DEADLINE", "stage": "SAMPLE", "title": "APPROVED CAMPAIGN SAMPLES IN DELTA WHS", "description": "All approved samples required for market are received for use", "comments": null, "sundays": {"weeks": -15, "date": "2026-11-30T00:00:00"}, "hetta": {"weeks": -19, "date": "2026-11-16T00:00:00"}}, {"step": 43, "type": "STEP", "stage": "PRODUCTION", "title": "FINISHED GOODS PRODUCTION COMPLETE", "description": "Finished goods are completed at the vendor", "comments": null, "sundays": {"weeks": -10, "date": "2027-01-04T00:00:00"}, "hetta": {"weeks": -14, "date": "2026-12-21T00:00:00"}}, {"step": 44, "type": "STEP", "stage": "PRODUCTION", "title": "FINISHED GOODS QUALITY INSPECTION", "description": "QC audit on finished goods is completed prior to shipment", "comments": null, "sundays": {"weeks": -9, "date": "2027-01-11T00:00:00"}, "hetta": {"weeks": -13, "date": "2026-12-28T00:00:00"}}, {"step": 45, "type": "DEADLINE", "stage": null, "title": "PRODUCT COPY COMPLETED", "description": "Marketing copy is completed by item", "comments": null, "sundays": {"weeks": -8, "date": "2027-01-18T00:00:00"}, "hetta": {"weeks": -12, "date": "2027-01-04T00:00:00"}}, {"step": 46, "type": "DEADLINE", "stage": null, "title": "CARTON DATA COMPLETED", "description": "Carton data is finalized on  Product Data form", "comments": null, "sundays": {"weeks": -8, "date": "2027-01-18T00:00:00"}, "hetta": {"weeks": -12, "date": "2027-01-04T00:00:00"}}, {"step": 47, "type": "STEP", "stage": "PRODUCTION", "title": "FINISHED GOODS SHIP", "description": "Finished goods exit the vendor", "comments": null, "sundays": {"weeks": -8, "date": "2027-01-18T00:00:00"}, "hetta": {"weeks": -12, "date": "2027-01-04T00:00:00"}}, {"step": 48, "type": "STEP", "stage": "SAMPLE", "title": "CAMPAIGN SHOOT", "description": "Marketing shoots seasonal campagin", "comments": null, "sundays": {"weeks": -8, "date": "2027-01-18T00:00:00"}, "hetta": {"weeks": -12, "date": "2027-01-04T00:00:00"}}, {"step": 49, "type": "DEADLINE", "stage": null, "title": "LIFESTYLE/CAMPAIGN IMAGERY COMPLETED", "description": "Lifestyle and campaign imagery is completed for launch", "comments": null, "sundays": {"weeks": -7, "date": "2027-01-25T00:00:00"}, "hetta": {"weeks": -11, "date": "2027-01-11T00:00:00"}}, {"step": 50, "type": "STEP", "stage": null, "title": "PRICE VALIDATION", "description": "Products prices are confirmed", "comments": null, "sundays": {"weeks": -6, "date": "2027-02-01T00:00:00"}, "hetta": {"weeks": -2, "date": "2027-03-15T00:00:00"}}, {"step": 51, "type": "STEP", "stage": null, "title": "MERCHANDISING", "description": "Merchandising completed for Season Launch", "comments": null, "sundays": {"weeks": -6, "date": "2027-02-01T00:00:00"}, "hetta": {"weeks": -2, "date": "2027-03-15T00:00:00"}}, {"step": 52, "type": "STEP", "stage": null, "title": "PRODUCT BRIEF", "description": "Summary of all products being launched", "comments": null, "sundays": {"weeks": -6, "date": "2027-02-01T00:00:00"}, "hetta": {"weeks": -2, "date": "2027-03-15T00:00:00"}}, {"step": 53, "type": "DEADLINE", "stage": null, "title": "TRADE LAUNCH PREVIEW", "description": "Products are pre-launched with Trade Clients", "comments": null, "sundays": {"weeks": -4, "date": "2027-02-15T00:00:00"}, "hetta": {"weeks": -1, "date": "2027-03-22T00:00:00"}}, {"step": 54, "type": "DEADLINE", "stage": "PRODUCTION", "title": "FINISHED GOODS IN WHS", "description": "Finished goods are received in warehouses", "comments": "same as launch date", "sundays": {"weeks": 0, "date": "2027-03-15T00:00:00"}, "hetta": {"weeks": 4, "date": "2027-04-26T00:00:00"}}, {"step": 55, "type": "STEP", "stage": null, "title": "ECOMERCE QA", "description": "Review ecommerce experince before sharing with rest of the company. Always on Wednesdays", "comments": null, "sundays": {"weeks": 4, "date": "2027-04-12T00:00:00"}, "hetta": {"weeks": 0, "date": "2027-03-29T00:00:00"}}, {"step": 56, "type": "DEADLINE", "stage": null, "title": "SEASON LAUNCH", "description": "Products are launched online and in showrooms to customers", "comments": null, "sundays": {"weeks": 0, "date": "2027-03-15T00:00:00"}, "hetta": {"weeks": 0, "date": "2027-03-29T00:00:00"}}, {"step": 57, "type": "DEADLINE", "stage": null, "title": "SEASON CLOSE", "description": "Season closes when post-season starts for next development season", "comments": null, "sundays": {"weeks": 12, "date": "2027-06-07T00:00:00"}, "hetta": {"weeks": 12, "date": "2027-06-21T00:00:00"}}], "SEPT_DROP": [{"step": 1, "type": "CHECKPOINT", "stage": "PSR", "title": "POST-SEASON REVIEW", "description": "Cross-functional leadership review of past season performance to identify opportunities for future season development", "comments": "Jan and Sept drops only", "sundays": {"weeks": -70, "date": "2025-05-26T00:00:00"}, "hetta": {"weeks": -74, "date": "2025-05-12T00:00:00"}}, {"step": 2, "type": "CHECKPOINT", "stage": "CSR", "title": "CATEGORY  SALES REVIEW", "description": "Detailed sales and product review by category to confirm which items to CO and identify opportunities for future season development", "comments": null, "sundays": {"weeks": -69, "date": "2025-06-02T00:00:00"}, "hetta": {"weeks": -73, "date": "2025-05-19T00:00:00"}}, {"step": 3, "type": "DEADLINE", "stage": null, "title": "INITIAL FUNCTION PLAN REVIEW", "description": "Review/workshop initial assortment plan by category", "comments": null, "sundays": {"weeks": -67, "date": "2025-06-16T00:00:00"}, "hetta": {"weeks": -71, "date": "2025-06-02T00:00:00"}}, {"step": 4, "type": "STEP", "stage": null, "title": "TREND & MARKETPLACE REVIEW", "description": "Overview of prioritized Design and Competitor trends by category to identify opportunities for future season development", "comments": null, "sundays": {"weeks": -67, "date": "2025-06-16T00:00:00"}, "hetta": {"weeks": -71, "date": "2025-06-02T00:00:00"}}, {"step": 5, "type": "STEP", "stage": null, "title": "CATEGORY  LINE PLANNING", "description": "Product team prepares initial assortment plan by category based on top-down initial function plan and key Design and Competitor trends by category", "comments": "does this need to move out?", "sundays": {"weeks": -67, "date": "2025-06-16T00:00:00"}, "hetta": {"weeks": -71, "date": "2025-06-02T00:00:00"}}, {"step": 6, "type": "STEP", "stage": null, "title": "CARRYOVER REVIEW", "description": "Review areas of opportunity for top selling carryover items and franchises to drive sales", "comments": null, "sundays": {"weeks": -67, "date": "2025-06-16T00:00:00"}, "hetta": {"weeks": -71, "date": "2025-06-02T00:00:00"}}, {"step": 7, "type": "CHECKPOINT", "stage": null, "title": "PRODUCT STRATEGY", "description": "Approve proposed assortment plan by category, inclusive of number of developments by price and function for development", "comments": null, "sundays": {"weeks": -65, "date": "2025-06-30T00:00:00"}, "hetta": {"weeks": -69, "date": "2025-06-16T00:00:00"}}, {"step": 8, "type": "DEADLINE", "stage": null, "title": "FUNCTION PLAN FINALIZED", "description": "Final function plan confirmed", "comments": null, "sundays": {"weeks": -65, "date": "2025-06-30T00:00:00"}, "hetta": {"weeks": -69, "date": "2025-06-16T00:00:00"}}, {"step": 9, "type": "STEP", "stage": null, "title": "CATEGORY BRIEF TO DESIGNERS", "description": "Designers are briefed on Product strategy and key focus areas/needs from Vendors for the season", "comments": "ADDED // Category brief should be to designers too. Not just factories.", "sundays": {"weeks": -64, "date": "2025-07-07T00:00:00"}, "hetta": {"weeks": -68, "date": "2025-06-23T00:00:00"}}, {"step": 10, "type": "DEADLINE", "stage": null, "title": "INITIAL DESIGNS COMPLETED", "description": "Design completes sketches of each item for review", "comments": null, "sundays": {"weeks": -58, "date": "2025-08-18T00:00:00"}, "hetta": {"weeks": -62, "date": "2025-08-04T00:00:00"}}, {"step": 11, "type": "STEP", "stage": null, "title": "CATEGORY BRIEF TO VENDORS", "description": "Vendors are briefed on designs for the season", "comments": null, "sundays": {"weeks": -58, "date": "2025-08-18T00:00:00"}, "hetta": {"weeks": -62, "date": "2025-08-04T00:00:00"}}, {"step": 12, "type": "DEADLINE", "stage": null, "title": "QUOTATION - START", "description": "Initial quotations requested from vendors", "comments": null, "sundays": {"weeks": -58, "date": "2025-08-18T00:00:00"}, "hetta": {"weeks": -62, "date": "2025-08-04T00:00:00"}}, {"step": 13, "type": "DEADLINE", "stage": null, "title": "QUOTATION - END", "description": "Initial quotations received from Vendors", "comments": "3 weeks from requesting", "sundays": {"weeks": -55, "date": "2025-09-08T00:00:00"}, "hetta": {"weeks": -59, "date": "2025-08-25T00:00:00"}}, {"step": 14, "type": "DEADLINE", "stage": null, "title": "LINE PLAN CREATED", "description": "Line plan by category is created", "comments": null, "sundays": {"weeks": -54, "date": "2025-09-15T00:00:00"}, "hetta": {"weeks": -58, "date": "2025-09-01T00:00:00"}}, {"step": 15, "type": "CHECKPOINT", "stage": null, "title": "PRODUCT PLAN", "description": "Approve CO improvements, program builds and net new designs by category for the season", "comments": null, "sundays": {"weeks": -50, "date": "2025-10-13T00:00:00"}, "hetta": {"weeks": -54, "date": "2025-09-29T00:00:00"}}, {"step": 16, "type": "DEADLINE", "stage": "SAMPLE", "title": "SAMPLE TOF CREATED", "description": "Product Development creates initial TOF/specifications sheet for Products proposed for development", "comments": null, "sundays": {"weeks": -49, "date": "2025-10-20T00:00:00"}, "hetta": {"weeks": -53, "date": "2025-10-06T00:00:00"}}, {"step": 17, "type": "STEP", "stage": "SAMPLE", "title": "SAMPLE SKU CREATED", "description": "Sample SKU is created in the system by Data Team", "comments": "3 weeks for Data Team to process", "sundays": {"weeks": -46, "date": "2025-11-10T00:00:00"}, "hetta": {"weeks": -50, "date": "2025-10-27T00:00:00"}}, {"step": 18, "type": "DEADLINE", "stage": "SAMPLE", "title": "SAMPLE PO PASSED", "description": "Sample PO passed to vendor for execution", "comments": null, "sundays": {"weeks": -46, "date": "2025-11-10T00:00:00"}, "hetta": {"weeks": -50, "date": "2025-10-27T00:00:00"}}, {"step": 19, "type": "STEP", "stage": "SAMPLE", "title": "FIRST SAMPLE QC REVIEW", "description": "QC report is completed at vendor for review", "comments": "6 weeks for samples to be ready for QC review", "sundays": {"weeks": -40, "date": "2025-12-22T00:00:00"}, "hetta": {"weeks": -44, "date": "2025-12-08T00:00:00"}}, {"step": 20, "type": "STEP", "stage": "SAMPLE", "title": "FIRST SAMPLE PRODUCT DEVELOPMENT REVIEW", "description": "Product Development reviews sample and provides comments/feedback for adjustments", "comments": null, "sundays": {"weeks": -39, "date": "2025-12-29T00:00:00"}, "hetta": {"weeks": -43, "date": "2025-12-15T00:00:00"}}, {"step": 21, "type": "CHECKPOINT", "stage": "SAMPLE", "title": "DROP CONFIRMATION", "description": "Full DROP assortment confirmed and presented to cross-functional partners.", "comments": null, "sundays": {"weeks": -37, "date": "2026-01-12T00:00:00"}, "hetta": {"weeks": -41, "date": "2025-12-29T00:00:00"}}, {"step": 22, "type": "STEP", "stage": "SAMPLE", "title": "CAMPAIGN SAMPLE CONFIRMATION", "description": "Confirm which products we need to order for campaigns", "comments": null, "sundays": {"weeks": -36, "date": "2026-01-19T00:00:00"}, "hetta": {"weeks": -40, "date": "2026-01-05T00:00:00"}}, {"step": 23, "type": "DEADLINE", "stage": "SAMPLE", "title": "CAMPAIGN SAMPLE SHIP", "description": "Samples for campaign ship from vendor", "comments": null, "sundays": {"weeks": -35, "date": "2026-01-26T00:00:00"}, "hetta": {"weeks": -39, "date": "2026-01-12T00:00:00"}}, {"step": 24, "type": "STEP", "stage": "SAMPLE", "title": "SECOND SAMPLE QC REVIEW", "description": "QC report is completed at vendor for review", "comments": null, "sundays": {"weeks": -32, "date": "2026-02-16T00:00:00"}, "hetta": {"weeks": -36, "date": "2026-02-02T00:00:00"}}, {"step": 25, "type": "STEP", "stage": "SAMPLE", "title": "SECOND SAMPLE PRODUCT DEVELOPMENT REVIEW", "description": "Product Development reviews sample and provides comments/feedback for adjustments", "comments": null, "sundays": {"weeks": -31, "date": "2026-02-23T00:00:00"}, "hetta": {"weeks": -35, "date": "2026-02-09T00:00:00"}}, {"step": 26, "type": "DEADLINE", "stage": "SAMPLE", "title": "FINAL PRODUCT APPROVAL", "description": "All aspects of product are approved to proceed", "comments": null, "sundays": {"weeks": -30, "date": "2026-03-02T00:00:00"}, "hetta": {"weeks": -34, "date": "2026-02-16T00:00:00"}}, {"step": 27, "type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCT DATA FORM - START", "description": "All product data is completed and finalized", "comments": null, "sundays": {"weeks": -29, "date": "2026-03-09T00:00:00"}, "hetta": {"weeks": -32, "date": "2026-03-02T00:00:00"}}, {"step": 28, "type": "DEADLINE", "stage": "PRODUCTION", "title": "AI AND DIAGRAMS - START", "description": "AIs are be created and submitted for review after a final sample has been approved.", "comments": null, "sundays": {"weeks": -29, "date": "2026-03-09T00:00:00"}, "hetta": {"weeks": -32, "date": "2026-03-02T00:00:00"}}, {"step": 29, "type": "DEADLINE", "stage": "SAMPLE", "title": "SILO IMAGE - START", "description": "Images of approved sample are captured by vendor and submitted for review by the PD team.", "comments": null, "sundays": {"weeks": -29, "date": "2026-03-09T00:00:00"}, "hetta": {"weeks": -32, "date": "2026-03-02T00:00:00"}}, {"step": 30, "type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCTION TOF SENT TO DATA", "description": "Production TOF is submitted to be processed by Data Team.", "comments": null, "sundays": {"weeks": -29, "date": "2026-03-09T00:00:00"}, "hetta": {"weeks": -32, "date": "2026-03-02T00:00:00"}}, {"step": 31, "type": "DEADLINE", "stage": "PRODUCTION", "title": "FINISHED GOODS PO PASSED TO CHINA OFFICE", "description": "Confirmed FG PO's are passed to China Office - NEGOTIADED WITH VENDOR", "comments": null, "sundays": {"weeks": -27, "date": "2026-03-23T00:00:00"}, "hetta": {"weeks": -31, "date": "2026-03-09T00:00:00"}}, {"step": 32, "type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCT DATA FORM - END", "description": "All product data is completed and finalized", "comments": "2 weeks for review", "sundays": {"weeks": -26, "date": "2026-03-30T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-03-16T00:00:00"}}, {"step": 33, "type": "DEADLINE", "stage": "PRODUCTION", "title": "AI AND DIAGRAMS - END", "description": "AIs are be created and submitted for review after a final sample has been approved.", "comments": "2 weeks for review", "sundays": {"weeks": -26, "date": "2026-03-30T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-03-16T00:00:00"}}, {"step": 34, "type": "DEADLINE", "stage": "SAMPLE", "title": "SILO IMAGE - END", "description": "Images of approved sample are captured by vendor and submitted for review by the PD team.", "comments": "3 weeks for review from submission", "sundays": {"weeks": -26, "date": "2026-03-30T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-03-16T00:00:00"}}, {"step": 35, "type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCTION SKU CREATED", "description": "Production SKUs are complete and created in the system.", "comments": "3 weeks for Data team to process from receiving TOF date.", "sundays": {"weeks": -26, "date": "2026-03-30T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-03-16T00:00:00"}}, {"step": 36, "type": "DEADLINE", "stage": "PRODUCTION", "title": "FINISHED GOODS PO PASSED TO VENDORS", "description": "Confirmed FG PO's are passed to vendors", "comments": null, "sundays": {"weeks": -26, "date": "2026-03-30T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-03-16T00:00:00"}}, {"step": 37, "type": "STEP", "stage": "PRODUCTION", "title": "PRODUCTION STARTS", "description": "Finished goods production starts at vendors", "comments": null, "sundays": {"weeks": -26, "date": "2026-03-30T00:00:00"}, "hetta": {"weeks": -30, "date": "2026-03-16T00:00:00"}}, {"step": 38, "type": "STEP", "stage": "PRODUCTION", "title": "CONTAINER PLANNING/OPTIMIZATION", "description": "Distribution Management reviews planned PO's by vendor and region to optimize containers and shipments", "comments": "2 weeks after production sku creation", "sundays": {"weeks": -24, "date": "2026-04-13T00:00:00"}, "hetta": {"weeks": -28, "date": "2026-03-30T00:00:00"}}, {"step": 39, "type": "CHECKPOINT", "stage": null, "title": "CAMPAIGN STRATEGY", "description": "Align on seasonal campaign strategy and shoot plan for launch", "comments": null, "sundays": {"weeks": -17, "date": "2026-06-01T00:00:00"}, "hetta": {"weeks": -21, "date": "2026-05-18T00:00:00"}}, {"step": 40, "type": "DEADLINE", "stage": null, "title": "SILOS UPLOADED TO BRAND FOLDER", "description": "Finalized images are upload to Brandfolder  platform with proper naming convention and tags", "comments": null, "sundays": {"weeks": -15, "date": "2026-06-15T00:00:00"}, "hetta": {"weeks": -19, "date": "2026-06-01T00:00:00"}}, {"step": 41, "type": "CHECKPOINT", "stage": null, "title": "SHOWROOM MERCHANDISING PLAN", "description": "Review merchandising/showroom execution", "comments": null, "sundays": {"weeks": -15, "date": "2026-06-15T00:00:00"}, "hetta": {"weeks": -19, "date": "2026-06-01T00:00:00"}}, {"step": 42, "type": "DEADLINE", "stage": "SAMPLE", "title": "APPROVED CAMPAIGN SAMPLES IN DELTA WHS", "description": "All approved samples required for market are received for use", "comments": null, "sundays": {"weeks": -15, "date": "2026-06-15T00:00:00"}, "hetta": {"weeks": -19, "date": "2026-06-01T00:00:00"}}, {"step": 43, "type": "STEP", "stage": "PRODUCTION", "title": "FINISHED GOODS PRODUCTION COMPLETE", "description": "Finished goods are completed at the vendor", "comments": null, "sundays": {"weeks": -10, "date": "2026-07-20T00:00:00"}, "hetta": {"weeks": -14, "date": "2026-07-06T00:00:00"}}, {"step": 44, "type": "STEP", "stage": "PRODUCTION", "title": "FINISHED GOODS QUALITY INSPECTION", "description": "QC audit on finished goods is completed prior to shipment", "comments": null, "sundays": {"weeks": -9, "date": "2026-07-27T00:00:00"}, "hetta": {"weeks": -13, "date": "2026-07-13T00:00:00"}}, {"step": 45, "type": "DEADLINE", "stage": null, "title": "PRODUCT COPY COMPLETED", "description": "Marketing copy is completed by item", "comments": null, "sundays": {"weeks": -8, "date": "2026-08-03T00:00:00"}, "hetta": {"weeks": -12, "date": "2026-07-20T00:00:00"}}, {"step": 46, "type": "DEADLINE", "stage": null, "title": "CARTON DATA COMPLETED", "description": "Carton data is finalized on  Product Data form", "comments": null, "sundays": {"weeks": -8, "date": "2026-08-03T00:00:00"}, "hetta": {"weeks": -12, "date": "2026-07-20T00:00:00"}}, {"step": 47, "type": "STEP", "stage": "PRODUCTION", "title": "FINISHED GOODS SHIP", "description": "Finished goods exit the vendor", "comments": null, "sundays": {"weeks": -8, "date": "2026-08-03T00:00:00"}, "hetta": {"weeks": -12, "date": "2026-07-20T00:00:00"}}, {"step": 48, "type": "STEP", "stage": "SAMPLE", "title": "CAMPAIGN SHOOT", "description": "Marketing shoots seasonal campagin", "comments": null, "sundays": {"weeks": -8, "date": "2026-08-03T00:00:00"}, "hetta": {"weeks": -12, "date": "2026-07-20T00:00:00"}}, {"step": 49, "type": "DEADLINE", "stage": null, "title": "LIFESTYLE/CAMPAIGN IMAGERY COMPLETED", "description": "Lifestyle and campaign imagery is completed for launch", "comments": null, "sundays": {"weeks": -7, "date": "2026-08-10T00:00:00"}, "hetta": {"weeks": -11, "date": "2026-07-27T00:00:00"}}, {"step": 50, "type": "STEP", "stage": null, "title": "PRICE VALIDATION", "description": "Products prices are confirmed", "comments": null, "sundays": {"weeks": -6, "date": "2026-08-17T00:00:00"}, "hetta": {"weeks": -2, "date": "2026-09-28T00:00:00"}}, {"step": 51, "type": "STEP", "stage": null, "title": "MERCHANDISING", "description": "Merchandising completed for Season Launch", "comments": null, "sundays": {"weeks": -6, "date": "2026-08-17T00:00:00"}, "hetta": {"weeks": -2, "date": "2026-09-28T00:00:00"}}, {"step": 52, "type": "STEP", "stage": null, "title": "PRODUCT BRIEF", "description": "Summary of all products being launched", "comments": null, "sundays": {"weeks": -6, "date": "2026-08-17T00:00:00"}, "hetta": {"weeks": -2, "date": "2026-09-28T00:00:00"}}, {"step": 53, "type": "DEADLINE", "stage": null, "title": "TRADE LAUNCH PREVIEW", "description": "Products are pre-launched with Trade Clients", "comments": null, "sundays": {"weeks": -4, "date": "2026-08-31T00:00:00"}, "hetta": {"weeks": -1, "date": "2026-10-05T00:00:00"}}, {"step": 54, "type": "DEADLINE", "stage": "PRODUCTION", "title": "FINISHED GOODS IN WHS", "description": "Finished goods are received in warehouses", "comments": "same as launch date", "sundays": {"weeks": 0, "date": "2026-09-28T00:00:00"}, "hetta": {"weeks": 4, "date": "2026-11-09T00:00:00"}}, {"step": 55, "type": "STEP", "stage": null, "title": "ECOMERCE QA", "description": "Review ecommerce experince before sharing with rest of the company. Always on Wednesdays", "comments": null, "sundays": {"weeks": 4, "date": "2026-10-26T00:00:00"}, "hetta": {"weeks": 0, "date": "2026-10-12T00:00:00"}}, {"step": 56, "type": "DEADLINE", "stage": null, "title": "SEASON LAUNCH", "description": "Products are launched online and in showrooms to customers", "comments": null, "sundays": {"weeks": 4, "date": "2026-09-28T00:00:00"}, "hetta": {"weeks": 0, "date": "2026-10-12T00:00:00"}}, {"step": 57, "type": "DEADLINE", "stage": null, "title": "SEASON CLOSE", "description": "Season closes when post-season starts for next development season", "comments": null, "sundays": {"weeks": 12, "date": "2026-12-21T00:00:00"}, "hetta": {"weeks": 12, "date": "2027-01-04T00:00:00"}}], "LIST_OF_STEPS": [{"type": "CHECKPOINT", "stage": "PSR", "title": "POST-SEASON REVIEW", "description": "Cross-functional leadership review of past season performance to identify opportunities for future season development", "hetta_weeks": -74, "sundays_weeks": -70, "comments": "Jan and Sept drops only"}, {"type": "CHECKPOINT", "stage": "CSR", "title": "CATEGORY  SALES REVIEW", "description": "Detailed sales and product review by category to confirm which items to CO and identify opportunities for future season development", "hetta_weeks": -73, "sundays_weeks": -69, "comments": null}, {"type": "DEADLINE", "stage": null, "title": "INITIAL FUNCTION PLAN REVIEW", "description": "Review/workshop initial assortment plan by category", "hetta_weeks": -71, "sundays_weeks": -67, "comments": null}, {"type": "STEP", "stage": null, "title": "TREND & MARKETPLACE REVIEW", "description": "Overview of prioritized Design and Competitor trends by category to identify opportunities for future season development", "hetta_weeks": -71, "sundays_weeks": -67, "comments": null}, {"type": "STEP", "stage": null, "title": "CATEGORY  LINE PLANNING", "description": "Product team prepares initial assortment plan by category based on top-down initial function plan and key Design and Competitor trends by category", "hetta_weeks": -71, "sundays_weeks": -67, "comments": "does this need to move out?"}, {"type": "STEP", "stage": null, "title": "CARRYOVER REVIEW", "description": "Review areas of opportunity for top selling carryover items and franchises to drive sales", "hetta_weeks": -71, "sundays_weeks": -67, "comments": null}, {"type": "CHECKPOINT", "stage": null, "title": "PRODUCT STRATEGY", "description": "Approve proposed assortment plan by category, inclusive of number of developments by price and function for development", "hetta_weeks": -69, "sundays_weeks": -65, "comments": null}, {"type": "DEADLINE", "stage": null, "title": "FUNCTION PLAN FINALIZED", "description": "Final function plan confirmed", "hetta_weeks": -69, "sundays_weeks": -65, "comments": null}, {"type": "STEP", "stage": null, "title": "CATEGORY BRIEF TO DESIGNERS", "description": "Designers are briefed on Product strategy and key focus areas/needs from Vendors for the season", "hetta_weeks": -68, "sundays_weeks": -64, "comments": "ADDED // Category brief should be to designers too. Not just factories."}, {"type": "DEADLINE", "stage": null, "title": "INITIAL DESIGNS COMPLETED", "description": "Design completes sketches of each item for review", "hetta_weeks": -62, "sundays_weeks": -58, "comments": null}, {"type": "STEP", "stage": null, "title": "CATEGORY BRIEF TO VENDORS", "description": "Vendors are briefed on designs for the season", "hetta_weeks": -62, "sundays_weeks": -58, "comments": null}, {"type": "DEADLINE", "stage": null, "title": "QUOTATION - START", "description": "Initial quotations requested from vendors", "hetta_weeks": -62, "sundays_weeks": -58, "comments": null}, {"type": "DEADLINE", "stage": null, "title": "QUOTATION - END", "description": "Initial quotations received from Vendors", "hetta_weeks": -59, "sundays_weeks": -55, "comments": "3 weeks from requesting"}, {"type": "DEADLINE", "stage": null, "title": "LINE PLAN CREATED", "description": "Line plan by category is created", "hetta_weeks": -58, "sundays_weeks": -54, "comments": null}, {"type": "CHECKPOINT", "stage": null, "title": "PRODUCT PLAN", "description": "Approve CO improvements, program builds and net new designs by category for the season", "hetta_weeks": -54, "sundays_weeks": -50, "comments": null}, {"type": "DEADLINE", "stage": "SAMPLE", "title": "SAMPLE TOF CREATED", "description": "Product Development creates initial TOF/specifications sheet for Products proposed for development", "hetta_weeks": -53, "sundays_weeks": -49, "comments": null}, {"type": "STEP", "stage": "SAMPLE", "title": "SAMPLE SKU CREATED", "description": "Sample SKU is created in the system by Data Team", "hetta_weeks": -50, "sundays_weeks": -46, "comments": "3 weeks for Data Team to process"}, {"type": "DEADLINE", "stage": "SAMPLE", "title": "SAMPLE PO PASSED", "description": "Sample PO passed to vendor for execution", "hetta_weeks": -50, "sundays_weeks": -46, "comments": null}, {"type": "STEP", "stage": "SAMPLE", "title": "FIRST SAMPLE QC REVIEW", "description": "QC report is completed at vendor for review", "hetta_weeks": -44, "sundays_weeks": -40, "comments": "6 weeks for samples to be ready for QC review"}, {"type": "STEP", "stage": "SAMPLE", "title": "FIRST SAMPLE PRODUCT DEVELOPMENT REVIEW", "description": "Product Development reviews sample and provides comments/feedback for adjustments", "hetta_weeks": -43, "sundays_weeks": -39, "comments": null}, {"type": "CHECKPOINT", "stage": "SAMPLE", "title": "DROP CONFIRMATION", "description": "Full DROP assortment confirmed and presented to cross-functional partners.", "hetta_weeks": -41, "sundays_weeks": -37, "comments": null}, {"type": "STEP", "stage": "SAMPLE", "title": "CAMPAIGN SAMPLE CONFIRMATION", "description": "Confirm which products we need to order for campaigns", "hetta_weeks": -40, "sundays_weeks": -36, "comments": null}, {"type": "DEADLINE", "stage": "SAMPLE", "title": "CAMPAIGN SAMPLE SHIP", "description": "Samples for campaign ship from vendor", "hetta_weeks": -39, "sundays_weeks": -35, "comments": null}, {"type": "STEP", "stage": "SAMPLE", "title": "SECOND SAMPLE QC REVIEW", "description": "QC report is completed at vendor for review", "hetta_weeks": -36, "sundays_weeks": -32, "comments": null}, {"type": "STEP", "stage": "SAMPLE", "title": "SECOND SAMPLE PRODUCT DEVELOPMENT REVIEW", "description": "Product Development reviews sample and provides comments/feedback for adjustments", "hetta_weeks": -35, "sundays_weeks": -31, "comments": null}, {"type": "DEADLINE", "stage": "SAMPLE", "title": "FINAL PRODUCT APPROVAL", "description": "All aspects of product are approved to proceed", "hetta_weeks": -34, "sundays_weeks": -30, "comments": null}, {"type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCT DATA FORM - START", "description": "All product data is completed and finalized", "hetta_weeks": -32, "sundays_weeks": -29, "comments": null}, {"type": "DEADLINE", "stage": "PRODUCTION", "title": "AI AND DIAGRAMS - START", "description": "AIs are be created and submitted for review after a final sample has been approved.", "hetta_weeks": -32, "sundays_weeks": -29, "comments": null}, {"type": "DEADLINE", "stage": "SAMPLE", "title": "SILO IMAGE - START", "description": "Images of approved sample are captured by vendor and submitted for review by the PD team.", "hetta_weeks": -32, "sundays_weeks": -29, "comments": null}, {"type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCTION TOF SENT TO DATA", "description": "Production TOF is submitted to be processed by Data Team.", "hetta_weeks": -32, "sundays_weeks": -29, "comments": null}, {"type": "DEADLINE", "stage": "PRODUCTION", "title": "FINISHED GOODS PO PASSED TO CHINA OFFICE", "description": "Confirmed FG PO's are passed to China Office - NEGOTIADED WITH VENDOR", "hetta_weeks": -31, "sundays_weeks": -27, "comments": null}, {"type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCT DATA FORM - END", "description": "All product data is completed and finalized", "hetta_weeks": -30, "sundays_weeks": -26, "comments": "2 weeks for review"}, {"type": "DEADLINE", "stage": "PRODUCTION", "title": "AI AND DIAGRAMS - END", "description": "AIs are be created and submitted for review after a final sample has been approved.", "hetta_weeks": -30, "sundays_weeks": -26, "comments": "2 weeks for review"}, {"type": "DEADLINE", "stage": "SAMPLE", "title": "SILO IMAGE - END", "description": "Images of approved sample are captured by vendor and submitted for review by the PD team.", "hetta_weeks": -30, "sundays_weeks": -26, "comments": "3 weeks for review from submission"}, {"type": "DEADLINE", "stage": "PRODUCTION", "title": "PRODUCTION SKU CREATED", "description": "Production SKUs are complete and created in the system.", "hetta_weeks": -30, "sundays_weeks": -26, "comments": "3 weeks for Data team to process from receiving TOF date."}, {"type": "DEADLINE", "stage": "PRODUCTION", "title": "FINISHED GOODS PO PASSED TO VENDORS", "description": "Confirmed FG PO's are passed to vendors", "hetta_weeks": -30, "sundays_weeks": -26, "comments": null}, {"type": "STEP", "stage": "PRODUCTION", "title": "PRODUCTION STARTS", "description": "Finished goods production starts at vendors", "hetta_weeks": -30, "sundays_weeks": -26, "comments": null}, {"type": "STEP", "stage": "PRODUCTION", "title": "CONTAINER PLANNING/OPTIMIZATION", "description": "Distribution Management reviews planned PO's by vendor and region to optimize containers and shipments", "hetta_weeks": -28, "sundays_weeks": -24, "comments": "2 weeks after production sku creation"}, {"type": "CHECKPOINT", "stage": null, "title": "CAMPAIGN STRATEGY", "description": "Align on seasonal campaign strategy and shoot plan for launch", "hetta_weeks": -21, "sundays_weeks": -17, "comments": null}, {"type": "DEADLINE", "stage": null, "title": "SILOS UPLOADED TO BRAND FOLDER", "description": "Finalized images are upload to Brandfolder  platform with proper naming convention and tags", "hetta_weeks": -19, "sundays_weeks": -15, "comments": null}, {"type": "CHECKPOINT", "stage": null, "title": "SHOWROOM MERCHANDISING PLAN", "description": "Review merchandising/showroom execution", "hetta_weeks": -19, "sundays_weeks": -15, "comments": null}, {"type": "DEADLINE", "stage": "SAMPLE", "title": "APPROVED CAMPAIGN SAMPLES IN DELTA WHS", "description": "All approved samples required for market are received for use", "hetta_weeks": -19, "sundays_weeks": -15, "comments": null}, {"type": "STEP", "stage": "PRODUCTION", "title": "FINISHED GOODS PRODUCTION COMPLETE", "description": "Finished goods are completed at the vendor", "hetta_weeks": -14, "sundays_weeks": -10, "comments": null}, {"type": "STEP", "stage": "PRODUCTION", "title": "FINISHED GOODS QUALITY INSPECTION", "description": "QC audit on finished goods is completed prior to shipment", "hetta_weeks": -13, "sundays_weeks": -9, "comments": null}, {"type": "DEADLINE", "stage": null, "title": "PRODUCT COPY COMPLETED", "description": "Marketing copy is completed by item", "hetta_weeks": -12, "sundays_weeks": -8, "comments": null}, {"type": "DEADLINE", "stage": null, "title": "CARTON DATA COMPLETED", "description": "Carton data is finalized on  Product Data form", "hetta_weeks": -12, "sundays_weeks": -8, "comments": null}, {"type": "STEP", "stage": "PRODUCTION", "title": "FINISHED GOODS SHIP", "description": "Finished goods exit the vendor", "hetta_weeks": -12, "sundays_weeks": -8, "comments": null}, {"type": "STEP", "stage": "SAMPLE", "title": "CAMPAIGN SHOOT", "description": "Marketing shoots seasonal campagin", "hetta_weeks": -12, "sundays_weeks": -8, "comments": null}, {"type": "DEADLINE", "stage": null, "title": "LIFESTYLE/CAMPAIGN IMAGERY COMPLETED", "description": "Lifestyle and campaign imagery is completed for launch", "hetta_weeks": -11, "sundays_weeks": -7, "comments": null}, {"type": "STEP", "stage": null, "title": "PRICE VALIDATION", "description": "Products prices are confirmed", "hetta_weeks": -2, "sundays_weeks": -6, "comments": null}, {"type": "STEP", "stage": null, "title": "MERCHANDISING", "description": "Merchandising completed for Season Launch", "hetta_weeks": -2, "sundays_weeks": -6, "comments": null}, {"type": "STEP", "stage": null, "title": "PRODUCT BRIEF", "description": "Summary of all products being launched", "hetta_weeks": -2, "sundays_weeks": -6, "comments": null}, {"type": "DEADLINE", "stage": null, "title": "TRADE LAUNCH PREVIEW", "description": "Products are pre-launched with Trade Clients", "hetta_weeks": -1, "sundays_weeks": -4, "comments": null}, {"type": "DEADLINE", "stage": "PRODUCTION", "title": "FINISHED GOODS IN WHS", "description": "Finished goods are received in warehouses", "hetta_weeks": 4, "sundays_weeks": 0, "comments": "same as launch date"}, {"type": "STEP", "stage": null, "title": "ECOMERCE QA", "description": "Review ecommerce experince before sharing with rest of the company. Always on Wednesdays", "hetta_weeks": 0, "sundays_weeks": 4, "comments": null}, {"type": "DEADLINE", "stage": null, "title": "SEASON LAUNCH", "description": "Products are launched online and in showrooms to customers", "hetta_weeks": 0, "sundays_weeks": 4, "comments": null}, {"type": "DEADLINE", "stage": null, "title": "SEASON CLOSE", "description": "Season closes when post-season starts for next development season", "hetta_weeks": 12, "sundays_weeks": 12, "comments": null}, {"type": "DEADLINE", "stage": null, "title": "SEASON CLOSE", "description": "Season closes when post-season starts for next development season", "hetta_weeks": 12, "sundays_weeks": 12, "comments": null}]};
+
+const DROPS = ['JAN_DROP','MARCH_DROP','SEPT_DROP'];
+const DROP_LABELS = {JAN_DROP:'Jan Drop',MARCH_DROP:'March Drop',SEPT_DROP:'Sept Drop'};
+const BRAND_LABELS = {SUNDAYS:'Sundays',HETTA:'Hetta'};
+const TYPE_COLORS = {CHECKPOINT:'#e9596a',STEP:'#9ca3af',DEADLINE:'#e07b00',MEETING:'#216ba5'};
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+let state = {
+  tab:'SEPT_DROP', brand:'BOTH', view:'table',
+  search:'', filterType:'', filterStage:'',
+  sortCol:'SUN_DATE', sortDir:'asc',
+  overlapDrops:{JAN_DROP:true,MARCH_DROP:true,SEPT_DROP:true},
+  overlapBrand:'BOTH',
+  calYear:new Date().getFullYear(), calMonth:new Date().getMonth(),
+  calSelected:null,
+  stepsSearch:'', stepsType:''
+};
+
+// ── helpers ───────────────────────────────────────────────────────────────────
+function fmtDate(d){if(!d)return null;const dt=new Date(d);if(isNaN(dt))return null;return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function fmtMonthYear(d){return new Date(d).toLocaleDateString('en-US',{month:'long',year:'numeric'});}
+function fmtDay(d){if(!d)return '—';return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function isOverdue(d){if(!d)return false;return new Date(d)<new Date()&&!isThisWeek(d);}
+function isThisWeek(d){if(!d)return false;return Math.abs(new Date(d)-new Date())<7*24*3600*1000;}
+function isThisMonth(d){if(!d)return false;const dt=new Date(d),n=new Date();return dt.getFullYear()===n.getFullYear()&&dt.getMonth()===n.getMonth();}
+function badgeCls(t){return 'badge badge-'+(TYPE_COLORS[t]?t:'default');}
+function dropBadge(d){return `<span class="drop-badge drop-badge-${d}">${DROP_LABELS[d]||d}</span>`;}
+function brandBadge(b){return `<span class="brand-badge brand-badge-${b}">${BRAND_LABELS[b]||b}</span>`;}
+function getDropData(d){return(DATA[d||state.tab]||[]).filter(r=>r&&typeof r==='object');}
+function getType(r){return(r.type||'').toUpperCase();}
+function getStage(r){return(r.stage||'').trim();}
+function getTitle(r){return(r.title||r.stage||'').trim();}
+function getDesc(r){return(r.description||'').trim();}
+function getComment(r){return(r.comments||'').trim();}
+function getSunDate(r){return r.sundays&&r.sundays.date||null;}
+function getHetDate(r){return r.hetta&&r.hetta.date||null;}
+function getSunWeeks(r){return r.sundays&&r.sundays.weeks!==undefined?r.sundays.weeks:null;}
+function getHetWeeks(r){return r.hetta&&r.hetta.weeks!==undefined?r.hetta.weeks:null;}
+
+// ── filter / sort ─────────────────────────────────────────────────────────────
+function filterRows(rows){
+  const q=state.search.toLowerCase();
+  return rows.filter(row=>{
+    if(q){const h=[getTitle(row),getStage(row),getDesc(row),getType(row),getComment(row)].join(' ').toLowerCase();if(!h.includes(q))return false;}
+    if(state.filterType&&getType(row)!==state.filterType)return false;
+    if(state.filterStage&&getStage(row)!==state.filterStage)return false;
+    return true;
+  });
+}
+function sortRows(rows){
+  return[...rows].sort((a,b)=>{
+    const far=new Date('2099-01-01');
+    if(state.sortCol==='SUN_DATE'||state.sortCol==='HET_DATE'){
+      const da=state.sortCol==='HET_DATE'?getHetDate(a):getSunDate(a);
+      const db=state.sortCol==='HET_DATE'?getHetDate(b):getSunDate(b);
+      const dta=da?new Date(da):far,dtb=db?new Date(db):far;
+      return state.sortDir==='asc'?dta-dtb:dtb-dta;
+    }
+    if(state.sortCol==='TYPE'){const va=getType(a),vb=getType(b);if(!va&&!vb)return 0;if(!va)return 1;if(!vb)return-1;return state.sortDir==='asc'?va.localeCompare(vb):vb.localeCompare(va);}
+    if(state.sortCol==='STEP'){return state.sortDir==='asc'?(a.step||0)-(b.step||0):(b.step||0)-(a.step||0);}
+    return 0;
+  });
+}
+
+// ── toolbar ───────────────────────────────────────────────────────────────────
+function brandBtnCls(b,cur){return b===cur?(b==='BOTH'?'brand-btn ab':b==='SUNDAYS'?'brand-btn as':'brand-btn ah'):'brand-btn';}
+function toolbarDrop(){
+  const all=getDropData();
+  const types=[...new Set(all.map(r=>getType(r)).filter(Boolean))].sort();
+  const stages=[...new Set(all.map(r=>getStage(r)).filter(Boolean))].sort();
+  return`<div class="brand-toggle">
+      <button class="${brandBtnCls('BOTH',state.brand)}" onclick="setBrand('BOTH')">Both</button>
+      <button class="${brandBtnCls('SUNDAYS',state.brand)}" onclick="setBrand('SUNDAYS')">Sundays</button>
+      <button class="${brandBtnCls('HETTA',state.brand)}" onclick="setBrand('HETTA')">Hetta</button>
+    </div>
+    <div class="search-wrap"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" class="search-input" id="search-input" placeholder="Search steps…" value="${esc(state.search)}"></div>
+    <select class="filter-select" id="filter-type"><option value="">All Types</option>${types.map(t=>`<option value="${esc(t)}"${state.filterType===t?' selected':''}>${esc(t)}</option>`).join('')}</select>
+    <select class="filter-select" id="filter-stage"><option value="">All Stages</option>${stages.map(s=>`<option value="${esc(s)}"${state.filterStage===s?' selected':''}>${esc(s)}</option>`).join('')}</select>
+    <span class="toolbar-spacer"></span>
+    <div class="view-toggle">
+      <button class="view-btn${state.view==='table'?' active':''}" data-view="table"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>List</button>
+      <button class="view-btn${state.view==='timeline'?' active':''}" data-view="timeline"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Timeline</button>
+    </div>`;
+}
+function dropToggles(prefix){return`<div class="drop-toggle-group">${DROPS.map(d=>`<label class="dtoggle dtoggle-${d}${state.overlapDrops[d]?'':' off'}" id="${prefix}dtoggle-${d}"><input type="checkbox" ${state.overlapDrops[d]?'checked':''} onchange="toggleDrop('${d}',this.checked)">${DROP_LABELS[d]}</label>`).join('')}</div>`;}
+function toolbarOverlap(){return`<div class="brand-toggle"><button class="${brandBtnCls('BOTH',state.overlapBrand)}" onclick="setOBrand('BOTH')">Both</button><button class="${brandBtnCls('SUNDAYS',state.overlapBrand)}" onclick="setOBrand('SUNDAYS')">Sundays</button><button class="${brandBtnCls('HETTA',state.overlapBrand)}" onclick="setOBrand('HETTA')">Hetta</button></div><span style="font-size:.73rem;font-weight:600;color:var(--gray2);letter-spacing:.04em;text-transform:uppercase;margin-left:.5rem">Drops:</span>${dropToggles('ol-')}`;}
+function toolbarCalendar(){return`<div class="brand-toggle"><button class="${brandBtnCls('BOTH',state.overlapBrand)}" onclick="setOBrand('BOTH')">Both</button><button class="${brandBtnCls('SUNDAYS',state.overlapBrand)}" onclick="setOBrand('SUNDAYS')">Sundays</button><button class="${brandBtnCls('HETTA',state.overlapBrand)}" onclick="setOBrand('HETTA')">Hetta</button></div><span style="font-size:.73rem;font-weight:600;color:var(--gray2);letter-spacing:.04em;text-transform:uppercase;margin-left:.5rem">Drops:</span>${dropToggles('cal-')}`;}
+function toolbarSteps(){const types=[...new Set((DATA['LIST_OF_STEPS']||[]).map(r=>r.type||'').filter(Boolean))].sort();return`<div class="search-wrap"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" class="search-input" id="steps-search" placeholder="Search steps…" value="${esc(state.stepsSearch)}"></div><select class="filter-select" id="steps-type"><option value="">All Types</option>${types.map(t=>`<option value="${esc(t)}"${state.stepsType===t?' selected':''}>${esc(t)}</option>`).join('')}</select>`;}
+
+// ── render TABLE ──────────────────────────────────────────────────────────────
+function renderTable(rows){
+  if(!rows.length)return`<div class="empty-state"><h3>No steps found</h3><p>Try adjusting filters.</p></div>`;
+  const both=state.brand==='BOTH';
+  function th(col,lbl,cls){const sc=state.sortCol===col?'sort-'+state.sortDir:'';return`<th class="${sc}${cls?' '+cls:''}" data-sort="${col}">${lbl}</th>`;}
+  const head=both
+    ?`<tr><th class="td-num">#</th><th>Type</th><th>Stage</th><th>Title</th><th class="td-desc">Description</th>${th('SUN_DATE','Sundays Date','sun-col')}<th class="sun-col td-weeks">Sun Wks</th>${th('HET_DATE','Hetta Date','het-col')}<th class="het-col td-weeks">Het Wks</th><th class="td-comment">Notes</th></tr>`
+    :`<tr><th class="td-num">#</th><th>Type</th><th>Stage</th><th>Title</th><th class="td-desc">Description</th>${th('SUN_DATE','Date')}<th class="td-weeks">Wks</th><th class="td-comment">Notes</th></tr>`;
+  const body=rows.map(row=>{
+    const type=getType(row),title=getTitle(row),desc=getDesc(row),comment=getComment(row);
+    const sd=getSunDate(row),hd=getHetDate(row),sw=getSunWeeks(row),hw=getHetWeeks(row);
+    const sCls=isOverdue(sd)?'overdue':isThisWeek(sd)?'upcoming':'';
+    const hCls=isOverdue(hd)?'overdue':isThisWeek(hd)?'upcoming':'';
+    const thisMo=isThisMonth(sd)||isThisMonth(hd);
+    if(both)return`<tr class="${thisMo?'today-row':''}">
+      <td class="td-num">${row.step||''}</td>
+      <td>${type?`<span class="${badgeCls(type)}">${esc(type)}</span>`:''}</td>
+      <td class="td-stage">${esc(getStage(row))}</td>
+      <td class="td-title">${esc(title)}</td>
+      <td class="td-desc">${esc(desc)}</td>
+      <td class="td-date td-date-sun ${sCls}">${fmtDate(sd)||'—'}</td>
+      <td class="td-weeks td-date-sun">${sw!==null?sw:'—'}</td>
+      <td class="td-date td-date-het ${hCls}">${fmtDate(hd)||'—'}</td>
+      <td class="td-weeks td-date-het">${hw!==null?hw:'—'}</td>
+      <td class="td-comment">${esc(comment)}</td>
+    </tr>`;
+    const d=state.brand==='HETTA'?hd:sd,w=state.brand==='HETTA'?hw:sw,dCls=state.brand==='HETTA'?hCls:sCls;
+    return`<tr class="${thisMo?'today-row':''}">
+      <td class="td-num">${row.step||''}</td>
+      <td>${type?`<span class="${badgeCls(type)}">${esc(type)}</span>`:''}</td>
+      <td class="td-stage">${esc(getStage(row))}</td>
+      <td class="td-title">${esc(title)}</td>
+      <td class="td-desc">${esc(desc)}</td>
+      <td class="td-date ${dCls}">${fmtDate(d)||'—'}</td>
+      <td class="td-weeks">${w!==null?w:'—'}</td>
+      <td class="td-comment">${esc(comment)}</td>
+    </tr>`;
+  }).join('');
+  return`<div class="table-wrap fade-in" style="overflow-x:auto"><table class="gtm-table"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+}
+
+// ── render TIMELINE ───────────────────────────────────────────────────────────
+function renderTimeline(rows){
+  if(!rows.length)return`<div class="empty-state"><h3>No steps found</h3></div>`;
+  const both=state.brand==='BOTH';
+  const events=[];
+  rows.forEach(row=>{
+    if(both||state.brand==='SUNDAYS'){const d=getSunDate(row);if(d)events.push({...row,_brand:'SUNDAYS',_date:d});}
+    if(both||state.brand==='HETTA'){const d=getHetDate(row);if(d)events.push({...row,_brand:'HETTA',_date:d});}
+  });
+  events.sort((a,b)=>new Date(a._date)-new Date(b._date));
+  const groups={};
+  events.forEach(ev=>{const k=fmtMonthYear(ev._date);if(!groups[k])groups[k]={rows:[],thisMonth:isThisMonth(ev._date)};groups[k].rows.push(ev);});
+  const html=Object.entries(groups).map(([month,grp])=>{
+    const rh=grp.rows.map(ev=>{
+      const type=getType(ev),title=getTitle(ev),desc=getDesc(ev),comment=getComment(ev);
+      const ov=isOverdue(ev._date),tw=isThisWeek(ev._date);
+      return`<div class="tl-row"><div class="tl-date ${ov?'overdue':tw?'upcoming':''}">${fmtDay(ev._date)}</div>
+        <div class="tl-content"><div class="tl-meta">${both?brandBadge(ev._brand):''}${type?`<span class="${badgeCls(type)}" style="font-size:.62rem">${esc(type)}</span>`:''}</div>
+        <div class="tl-title">${esc(title)}</div>${desc&&desc!==title?`<div class="tl-desc">${esc(desc)}</div>`:''}${comment?`<div class="tl-comment">${esc(comment)}</div>`:''}</div>
+        <div>${both?'':brandBadge(ev._brand)}</div></div>`;
+    }).join('');
+    return`<div class="month-group fade-in ${grp.thisMonth?'today-group':''}">
+      <div class="month-header" onclick="toggleMonth(this)"><span class="month-label">${grp.thisMonth?'▶ ':''}${month}</span><span class="month-count">${grp.rows.length} event${grp.rows.length!==1?'s':''}</span></div>
+      <div class="month-body" style="${grp.thisMonth?'':'display:none'}">${rh}</div></div>`;
+  }).join('');
+  return`<div class="timeline-wrap">${html}</div>`;
+}
+function toggleMonth(h){const b=h.nextElementSibling;b.style.display=b.style.display==='none'?'block':'none';}
+
+// ── render STEPS ──────────────────────────────────────────────────────────────
+function renderSteps(){
+  let rows=(DATA['LIST_OF_STEPS']||[]).filter(r=>r&&r.type);
+  const q=state.stepsSearch.toLowerCase();
+  if(q)rows=rows.filter(r=>[r.type||'',r.stage||'',r.title||'',r.description||''].join(' ').toLowerCase().includes(q));
+  if(state.stepsType)rows=rows.filter(r=>(r.type||'').toUpperCase()===state.stepsType);
+  if(!rows.length)return`<div class="empty-state"><h3>No steps found</h3></div>`;
+  document.getElementById('results-count').textContent=`${rows.length} of ${(DATA['LIST_OF_STEPS']||[]).length} steps`;
+  document.getElementById('legend').innerHTML='';
+  const body=rows.map(r=>`<tr>
+    <td>${r.type?`<span class="${badgeCls(r.type.toUpperCase())}">${esc(r.type)}</span>`:''}</td>
+    <td class="td-stage">${esc(r.stage||'')}</td>
+    <td class="td-title">${esc(r.title||'')}</td>
+    <td class="td-desc">${esc(r.description||'')}</td>
+    <td class="td-weeks td-date-sun" style="text-align:center">${r.sundays_weeks!==null&&r.sundays_weeks!==undefined?r.sundays_weeks:'—'}</td>
+    <td class="td-weeks td-date-het" style="text-align:center">${r.hetta_weeks!==null&&r.hetta_weeks!==undefined?r.hetta_weeks:'—'}</td>
+    <td class="td-comment">${esc(r.comments||'')}</td>
+  </tr>`).join('');
+  return`<div class="table-wrap fade-in" style="overflow-x:auto"><table class="gtm-table"><thead><tr>
+    <th>Type</th><th>Stage</th><th>Title</th><th>Description</th>
+    <th class="sun-col" title="Sundays Weeks to Launch">Sun Wks</th>
+    <th class="het-col" title="Hetta Weeks to Launch">Het Wks</th>
+    <th>Notes</th>
+  </tr></thead><tbody>${body}</tbody></table></div>`;
+}
+
+// ── render OVERLAP ────────────────────────────────────────────────────────────
+function renderOverlap(){
+  const active=DROPS.filter(d=>state.overlapDrops[d]);
+  if(!active.length)return`<div class="empty-state"><h3>No drops selected</h3></div>`;
+  const events=[];
+  active.forEach(d=>{
+    (getDropData(d)||[]).forEach(row=>{
+      if(state.overlapBrand!=='HETTA'){const dt=getSunDate(row);if(dt)events.push({...row,_drop:d,_brand:'SUNDAYS',_date:dt});}
+      if(state.overlapBrand!=='SUNDAYS'){const dt=getHetDate(row);if(dt)events.push({...row,_drop:d,_brand:'HETTA',_date:dt});}
+    });
+  });
+  events.sort((a,b)=>new Date(a._date)-new Date(b._date));
+  if(!events.length)return`<div class="empty-state"><h3>No steps with dates</h3></div>`;
+  document.getElementById('results-count').textContent=`${events.length} events across ${active.length} drop${active.length!==1?'s':''}`;
+  document.getElementById('legend').innerHTML=`<span class="legend-item"><span class="legend-dot" style="background:var(--sun)"></span>Sundays</span><span class="legend-item"><span class="legend-dot" style="background:var(--het)"></span>Hetta</span>`;
+  const groups={};
+  events.forEach(ev=>{const k=fmtMonthYear(ev._date);if(!groups[k])groups[k]={rows:[],thisMonth:isThisMonth(ev._date)};groups[k].rows.push(ev);});
+  const html=Object.entries(groups).map(([month,grp])=>{
+    const rh=grp.rows.map(ev=>{
+      const type=getType(ev),title=getTitle(ev),desc=getDesc(ev),comment=getComment(ev);
+      const ov=isOverdue(ev._date),tw=isThisWeek(ev._date);
+      return`<div class="tl-row"><div class="tl-date ${ov?'overdue':tw?'upcoming':''}">${fmtDay(ev._date)}</div>
+        <div class="tl-content"><div class="tl-meta">${dropBadge(ev._drop)}${brandBadge(ev._brand)}${type?`<span class="${badgeCls(type)}" style="font-size:.62rem">${esc(type)}</span>`:''}</div>
+        <div class="tl-title">${esc(title)}</div>${desc&&desc!==title?`<div class="tl-desc">${esc(desc)}</div>`:''}${comment?`<div class="tl-comment">${esc(comment)}</div>`:''}</div>
+      </div>`;
+    }).join('');
+    return`<div class="month-group fade-in ${grp.thisMonth?'today-group':''}">
+      <div class="month-header" onclick="toggleMonth(this)"><span class="month-label">${grp.thisMonth?'▶ ':''}${month}</span><span class="month-count">${grp.rows.length} event${grp.rows.length!==1?'s':''}</span></div>
+      <div class="month-body" style="${grp.thisMonth?'':'display:none'}">${rh}</div></div>`;
+  }).join('');
+  return`<div class="timeline-wrap">${html}</div>`;
+}
+function toggleDrop(d,val){state.overlapDrops[d]=val;document.querySelectorAll(`[id$="dtoggle-${d}"]`).forEach(el=>el.classList.toggle('off',!val));render();}
+function setOBrand(b){state.overlapBrand=b;render();}
+
+// ── render CALENDAR ───────────────────────────────────────────────────────────
+function renderCalendar(){
+  const yr=state.calYear,mo=state.calMonth;
+  const firstDay=new Date(yr,mo,1),lastDay=new Date(yr,mo+1,0),startDow=firstDay.getDay();
+  const today=new Date(),todayKey=`${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+  const byDate={};
+  DROPS.filter(d=>state.overlapDrops[d]).forEach(d=>{
+    (getDropData(d)||[]).forEach(row=>{
+      [[getSunDate(row),'SUNDAYS'],[getHetDate(row),'HETTA']].forEach(([dt,br])=>{
+        if(!dt)return;
+        if(state.overlapBrand!=='BOTH'&&state.overlapBrand!==br)return;
+        const ddt=new Date(dt);if(isNaN(ddt))return;
+        const k=`${ddt.getFullYear()}-${ddt.getMonth()}-${ddt.getDate()}`;
+        if(!byDate[k])byDate[k]=[];
+        byDate[k].push({...row,_drop:d,_brand:br,_date:dt});
+      });
+    });
+  });
+  const allInMonth=[];
+  Object.values(byDate).forEach(ev=>ev.forEach(s=>{const dt=new Date(s._date);if(dt.getFullYear()===yr&&dt.getMonth()===mo)allInMonth.push(s);}));
+  document.getElementById('results-count').textContent=`${allInMonth.length} event${allInMonth.length!==1?'s':''} in ${MONTHS[mo]} ${yr}`;
+  document.getElementById('legend').innerHTML=`<span class="legend-item"><span class="legend-dot" style="background:var(--sun)"></span>Sundays</span><span class="legend-item"><span class="legend-dot" style="background:var(--het)"></span>Hetta</span>`;
+  const dowH=DOW.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  const cells=[];
+  for(let i=0;i<startDow;i++){const pd=new Date(yr,mo,-(startDow-i-1));cells.push(`<div class="cal-cell other-month"><div class="cal-day-num">${pd.getDate()}</div></div>`);}
+  const MAX=4;
+  for(let d=1;d<=lastDay.getDate();d++){
+    const k=`${yr}-${mo}-${d}`,isToday=k===todayKey,steps=byDate[k]||[],count=steps.length;
+    const chips=steps.slice(0,MAX).map(row=>`<span class="cal-chip cal-chip-${row._brand}" title="${esc(getTitle(row))}" onclick="showCalDetail(${JSON.stringify(JSON.stringify({brand:row._brand,drop:row._drop,title:getTitle(row),type:getType(row),desc:getDesc(row),date:row._date,comment:getComment(row)}))},event)">${esc(getTitle(row)||getType(row))}</span>`).join('');
+    const more=count>MAX?`<span class="cal-more">+${count-MAX} more</span>`:'';
+    cells.push(`<div class="cal-cell${isToday?' is-today':''}" data-count="${count}"><div class="cal-day-num${isToday?' today':''}">${d}</div>${chips}${more}</div>`);
+  }
+  const trail=42-(startDow+lastDay.getDate());
+  for(let d=1;d<=trail&&trail<7;d++)cells.push(`<div class="cal-cell other-month"><div class="cal-day-num">${d}</div></div>`);
+  const detail=state.calSelected?renderCalDetail(state.calSelected):'';
+  return`<div class="cal-wrap fade-in">
+    <div class="cal-nav"><button class="cal-nav-btn" onclick="calNav(-1)">← Prev</button>
+      <div class="cal-nav-center"><span class="cal-nav-title">${MONTHS[mo]} ${yr}</span><button class="cal-nav-btn" onclick="calToday()">Today</button></div>
+      <button class="cal-nav-btn" onclick="calNav(1)">Next →</button></div>
+    <div class="cal-grid">${dowH}${cells.join('')}</div></div>${detail}`;
+}
+function renderCalDetail(d){return`<div class="cal-detail" id="cal-detail">
+  <button class="cal-detail-close" onclick="closeCalDetail()">✕</button>
+  <div class="cal-detail-title">${esc(d.title)}</div>
+  <div class="cal-detail-meta">${brandBadge(d.brand)}${dropBadge(d.drop)}${d.type?`<span class="${badgeCls(d.type)}">${esc(d.type)}</span>`:''}<span style="font-size:.75rem;color:var(--gray);font-weight:500">${fmtDate(d.date)||''}</span></div>
+  ${d.desc&&d.desc!==d.title?`<div class="cal-detail-desc">${esc(d.desc)}</div>`:''}
+  ${d.comment?`<div class="cal-detail-desc" style="font-style:italic;color:var(--gray)">${esc(d.comment)}</div>`:''}
+</div>`;}
+function showCalDetail(jsonStr,evt){evt&&evt.stopPropagation();state.calSelected=JSON.parse(jsonStr);const d=document.getElementById('cal-detail');if(d)d.outerHTML=renderCalDetail(state.calSelected);else document.getElementById('view-content').insertAdjacentHTML('beforeend',renderCalDetail(state.calSelected));}
+function closeCalDetail(){state.calSelected=null;const d=document.getElementById('cal-detail');if(d)d.remove();}
+function calNav(dir){state.calMonth+=dir;if(state.calMonth>11){state.calMonth=0;state.calYear++;}if(state.calMonth<0){state.calMonth=11;state.calYear--;}state.calSelected=null;render();}
+function calToday(){state.calMonth=new Date().getMonth();state.calYear=new Date().getFullYear();state.calSelected=null;render();}
+
+// ── helpers ───────────────────────────────────────────────────────────────────
+function setBrand(b){state.brand=b;state.sortCol=b==='HETTA'?'HET_DATE':'SUN_DATE';render();}
+function renderLegend(rows){const types=[...new Set(rows.map(r=>getType(r)).filter(Boolean))];document.getElementById('legend').innerHTML=types.map(t=>`<span class="legend-item"><span class="legend-dot" style="background:${TYPE_COLORS[t]||'#999'}"></span>${t.charAt(0)+t.slice(1).toLowerCase()}</span>`).join('');}
+
+// ── main render ───────────────────────────────────────────────────────────────
+function render(){
+  const ti=document.getElementById('toolbar-inner'),vc=document.getElementById('view-content'),tab=state.tab;
+  document.getElementById('summary-bar').style.display='flex';
+  if(DROPS.includes(tab)){
+    const all=getDropData(tab),filtered=filterRows(all),sorted=state.view==='table'?sortRows(filtered):filtered;
+    ti.innerHTML=toolbarDrop();
+    document.getElementById('results-count').textContent=`${filtered.length} of ${all.length} steps`;
+    renderLegend(filtered);
+    vc.innerHTML=state.view==='table'?renderTable(sorted):renderTimeline(filtered);
+    if(state.view==='table'){
+      document.querySelectorAll('.gtm-table th[data-sort]').forEach(th=>{
+        th.addEventListener('click',()=>{const col=th.dataset.sort;if(state.sortCol===col)state.sortDir=state.sortDir==='asc'?'desc':'asc';else{state.sortCol=col;state.sortDir='asc';}render();});
+      });
+    }
+    if(state.view==='timeline'){setTimeout(()=>{const cur=document.querySelector('.today-group .month-body');if(cur){cur.style.display='block';cur.closest('.month-group').scrollIntoView({behavior:'smooth',block:'center'});}},50);}
+    const si=document.getElementById('search-input');let st;si&&si.addEventListener('input',e=>{clearTimeout(st);st=setTimeout(()=>{state.search=e.target.value;render();},200);});
+    const ft=document.getElementById('filter-type');ft&&ft.addEventListener('change',e=>{state.filterType=e.target.value;render();});
+    const fs=document.getElementById('filter-stage');fs&&fs.addEventListener('change',e=>{state.filterStage=e.target.value;render();});
+    document.querySelectorAll('.view-btn').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');state.view=btn.dataset.view;render();}));
+  }else if(tab==='STEPS'){
+    ti.innerHTML=toolbarSteps();vc.innerHTML=renderSteps();
+    const si=document.getElementById('steps-search');let st;si&&si.addEventListener('input',e=>{clearTimeout(st);st=setTimeout(()=>{state.stepsSearch=e.target.value;render();},200);});
+    const ft=document.getElementById('steps-type');ft&&ft.addEventListener('change',e=>{state.stepsType=e.target.value;render();});
+  }else if(tab==='OVERLAP'){
+    ti.innerHTML=toolbarOverlap();vc.innerHTML=renderOverlap();
+  }else if(tab==='CALENDAR'){
+    ti.innerHTML=toolbarCalendar();vc.innerHTML=renderCalendar();
+  }
+}
+
+// ── init ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('today-chip').textContent='Today: '+new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  document.querySelectorAll('.drop-tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.drop-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      state.tab=btn.dataset.tab;
+      state.filterType='';state.filterStage='';state.search='';state.calSelected=null;
+      render();
+    });
+  });
+  render();
+});
+</script>
+</body>
+</html>
