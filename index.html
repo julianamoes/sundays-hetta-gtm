@@ -186,6 +186,21 @@ body{font-family:'Jost',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;b
 .guide-tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.72rem;font-weight:700;vertical-align:middle;margin:0 2px}
 .gt-red{background:#fde8ea;color:#b02a37}
 .gt-green{background:#dcfce7;color:#176b3a}
+.sim-bar{background:#fffce8;border-bottom:2px solid #e07b00;padding:.45rem 2rem;display:none}
+.sim-bar.open{display:block}
+.sim-inner{max-width:1600px;margin:0 auto;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.sim-label{font-size:.72rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#7a5a00;white-space:nowrap}
+.sim-brand-label{font-size:.72rem;font-weight:700}
+.sim-brand-label.sun{color:var(--sun)}
+.sim-brand-label.het{color:var(--het)}
+.sim-date-input{padding:4px 8px;border:1.5px solid #e0e0e0;border-radius:var(--rs);font-size:.78rem;font-family:inherit;color:var(--dark);outline:none;transition:var(--t)}
+.sim-date-input:focus{border-color:var(--amber)}
+.sim-reset-btn{padding:4px 12px;border:1px solid #e07b00;border-radius:20px;background:none;font-size:.72rem;font-family:inherit;color:#7a5a00;cursor:pointer;font-weight:600;transition:var(--t)}
+.sim-reset-btn:hover{background:#e07b00;color:#fff}
+.sim-active-badge{background:#e07b00;color:#fff;padding:2px 10px;border-radius:12px;font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-left:.25rem}
+.sim-btn{padding:6px 14px;border:1.5px solid #e0e0e0;border-radius:var(--r);font-size:.73rem;font-weight:600;font-family:inherit;background:none;cursor:pointer;color:var(--gray2);transition:var(--t);white-space:nowrap}
+.sim-btn:hover{border-color:var(--amber);color:var(--amber)}
+.sim-btn.active{background:var(--amber);color:#fff;border-color:var(--amber)}
 </style>
 </head>
 <body>
@@ -221,6 +236,7 @@ body{font-family:'Jost',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;b
 <div class="toolbar" id="toolbar">
   <div class="toolbar-inner" id="toolbar-inner"></div>
 </div>
+<div id="sim-bar"></div>
 <div class="main">
   <div class="summary-bar" id="summary-bar">
     <span class="results-count" id="results-count"></span>
@@ -301,6 +317,11 @@ const BRAND_LABELS = {SUNDAYS:'Sundays',HETTA:'Hetta'};
 const TYPE_COLORS = {CHECKPOINT:'#e9596a',STEP:'#9ca3af',DEADLINE:'#e07b00',MEETING:'#216ba5'};
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const LAUNCH_DATES = {
+  SEPT_DROP:{SUNDAYS:'2026-09-28',HETTA:'2026-11-09'},
+  JAN_DROP:{SUNDAYS:'2027-01-11',HETTA:'2027-02-22'},
+  MARCH_DROP:{SUNDAYS:'2027-03-15',HETTA:'2027-04-26'}
+};
 
 let state = {
   tab:'SEPT_DROP', brand:'BOTH', view:'table',
@@ -310,7 +331,9 @@ let state = {
   overlapBrand:'BOTH',
   calYear:new Date().getFullYear(), calMonth:new Date().getMonth(),
   calSelected:null,
-  stepsSearch:'', stepsType:''
+  stepsSearch:'', stepsType:'',
+  simOpen:false,
+  sim:{SEPT_DROP:{SUNDAYS:null,HETTA:null},JAN_DROP:{SUNDAYS:null,HETTA:null},MARCH_DROP:{SUNDAYS:null,HETTA:null}}
 };
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -330,8 +353,9 @@ function getStage(r){return(r.stage||'').trim();}
 function getTitle(r){return(r.title||r.stage||'').trim();}
 function getDesc(r){return(r.description||'').trim();}
 function getComment(r){return(r.comments||'').trim();}
-function getSunDate(r){return r.sundays&&r.sundays.date||null;}
-function getHetDate(r){return r.hetta&&r.hetta.date||null;}
+function simCalc(launch,weeks){if(!launch||weeks===null||weeks===undefined)return null;const dt=new Date(launch+'T00:00:00');dt.setDate(dt.getDate()+weeks*7);const y=dt.getFullYear(),mo=String(dt.getMonth()+1).padStart(2,'0'),d=String(dt.getDate()).padStart(2,'0');return `${y}-${mo}-${d}T00:00:00`;}
+function getSunDate(r,drop){const d=drop||state.tab;if(state.simOpen&&DROPS.includes(d)){const launch=(state.sim[d]&&state.sim[d].SUNDAYS)||LAUNCH_DATES[d].SUNDAYS;const w=r.sundays&&r.sundays.weeks!==undefined?r.sundays.weeks:null;return simCalc(launch,w);}return r.sundays&&r.sundays.date||null;}
+function getHetDate(r,drop){const d=drop||state.tab;if(state.simOpen&&DROPS.includes(d)){const launch=(state.sim[d]&&state.sim[d].HETTA)||LAUNCH_DATES[d].HETTA;const w=r.hetta&&r.hetta.weeks!==undefined?r.hetta.weeks:null;return simCalc(launch,w);}return r.hetta&&r.hetta.date||null;}
 function getSunWeeks(r){return r.sundays&&r.sundays.weeks!==undefined?r.sundays.weeks:null;}
 function getHetWeeks(r){return r.hetta&&r.hetta.weeks!==undefined?r.hetta.weeks:null;}
 
@@ -379,7 +403,8 @@ function toolbarDrop(){
     <div class="view-toggle">
       <button class="view-btn${state.view==='table'?' active':''}" data-view="table"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>List</button>
       <button class="view-btn${state.view==='timeline'?' active':''}" data-view="timeline"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Timeline</button>
-    </div>`;
+    </div>
+    <button class="sim-btn${state.simOpen?' active':''}" onclick="toggleSimPanel()" title="Simulate different launch dates">&#128197; Simulate</button>`;
 }
 function dropToggles(prefix){return`<div class="drop-toggle-group">${DROPS.map(d=>`<label class="dtoggle dtoggle-${d}${state.overlapDrops[d]?'':' off'}" id="${prefix}dtoggle-${d}"><input type="checkbox" ${state.overlapDrops[d]?'checked':''} onchange="toggleDrop('${d}',this.checked)">${DROP_LABELS[d]}</label>`).join('')}</div>`;}
 function toolbarOverlap(){return`<div class="brand-toggle"><button class="${brandBtnCls('BOTH',state.overlapBrand)}" onclick="setOBrand('BOTH')">Both</button><button class="${brandBtnCls('SUNDAYS',state.overlapBrand)}" onclick="setOBrand('SUNDAYS')">Sundays</button><button class="${brandBtnCls('HETTA',state.overlapBrand)}" onclick="setOBrand('HETTA')">Hetta</button></div><span style="font-size:.73rem;font-weight:600;color:var(--gray2);letter-spacing:.04em;text-transform:uppercase;margin-left:.5rem">Drops:</span>${dropToggles('ol-')}`;}
@@ -489,8 +514,8 @@ function renderOverlap(){
   const events=[];
   active.forEach(d=>{
     (getDropData(d)||[]).forEach(row=>{
-      if(state.overlapBrand!=='HETTA'){const dt=getSunDate(row);if(dt)events.push({...row,_drop:d,_brand:'SUNDAYS',_date:dt});}
-      if(state.overlapBrand!=='SUNDAYS'){const dt=getHetDate(row);if(dt)events.push({...row,_drop:d,_brand:'HETTA',_date:dt});}
+      if(state.overlapBrand!=='HETTA'){const dt=getSunDate(row,d);if(dt)events.push({...row,_drop:d,_brand:'SUNDAYS',_date:dt});}
+      if(state.overlapBrand!=='SUNDAYS'){const dt=getHetDate(row,d);if(dt)events.push({...row,_drop:d,_brand:'HETTA',_date:dt});}
     });
   });
   events.sort((a,b)=>new Date(a._date)-new Date(b._date));
@@ -516,6 +541,75 @@ function renderOverlap(){
 }
 function toggleDrop(d,val){state.overlapDrops[d]=val;document.querySelectorAll(`[id$="dtoggle-${d}"]`).forEach(el=>el.classList.toggle('off',!val));render();}
 function setOBrand(b){state.overlapBrand=b;render();}
+function toggleSimPanel(){state.simOpen=!state.simOpen;render();}
+function setSim(brand,val){
+  state.sim[state.tab][brand]=val||null;
+  // Re-render view content without replacing sim panel inputs
+  const tab=state.tab,vc=document.getElementById('view-content');
+  if(DROPS.includes(tab)){
+    const all=getDropData(tab),filtered=filterRows(all),sorted=state.view==='table'?sortRows(filtered):filtered;
+    document.getElementById('results-count').textContent=`${filtered.length} of ${all.length} steps`;
+    renderLegend(filtered);
+    vc.innerHTML=state.view==='table'?renderTable(sorted):renderTimeline(filtered);
+    if(state.view==='table'){document.querySelectorAll('.gtm-table th[data-sort]').forEach(th=>{th.addEventListener('click',()=>{const col=th.dataset.sort;if(state.sortCol===col)state.sortDir=state.sortDir==='asc'?'desc':'asc';else{state.sortCol=col;state.sortDir='asc';}render();});});}
+  }
+  updateSimBadge();
+}
+function updateSimBadge(){
+  const drop=state.tab,panel=document.getElementById('sim-bar');
+  if(!panel)return;
+  const orig=LAUNCH_DATES[drop]||{},cur=state.sim[drop]||{};
+  const changed=(cur.SUNDAYS&&cur.SUNDAYS!==orig.SUNDAYS)||(cur.HETTA&&cur.HETTA!==orig.HETTA);
+  let badge=panel.querySelector('.sim-active-badge');
+  if(changed&&!badge){const inner=panel.querySelector('.sim-inner');if(inner)inner.insertAdjacentHTML('beforeend','<span class="sim-active-badge">Simulating</span>');}
+  else if(!changed&&badge){badge.remove();}
+}
+function resetSim(){
+  state.sim[state.tab]={SUNDAYS:null,HETTA:null};
+  const panel=document.getElementById('sim-bar');
+  if(panel){
+    const drop=state.tab,orig=LAUNCH_DATES[drop]||{};
+    const si=document.getElementById('sim-sun'),hi=document.getElementById('sim-het');
+    if(si)si.value=orig.SUNDAYS||'';
+    if(hi)hi.value=orig.HETTA||'';
+    updateSimBadge();
+  }
+  const vc=document.getElementById('view-content'),tab=state.tab;
+  if(DROPS.includes(tab)){
+    const all=getDropData(tab),filtered=filterRows(all),sorted=state.view==='table'?sortRows(filtered):filtered;
+    document.getElementById('results-count').textContent=`${filtered.length} of ${all.length} steps`;
+    renderLegend(filtered);
+    vc.innerHTML=state.view==='table'?renderTable(sorted):renderTimeline(filtered);
+    if(state.view==='table'){document.querySelectorAll('.gtm-table th[data-sort]').forEach(th=>{th.addEventListener('click',()=>{const col=th.dataset.sort;if(state.sortCol===col)state.sortDir=state.sortDir==='asc'?'desc':'asc';else{state.sortCol=col;state.sortDir='asc';}render();});});}
+  }
+}
+function renderSimPanel(){
+  const drop=state.tab,panel=document.getElementById('sim-bar');
+  if(!panel)return;
+  if(!DROPS.includes(drop)||!state.simOpen){panel.classList.remove('open');panel.innerHTML='';return;}
+  const orig=LAUNCH_DATES[drop]||{},cur=state.sim[drop]||{};
+  const sunVal=cur.SUNDAYS||orig.SUNDAYS||'',hetVal=cur.HETTA||orig.HETTA||'';
+  const changed=(cur.SUNDAYS&&cur.SUNDAYS!==orig.SUNDAYS)||(cur.HETTA&&cur.HETTA!==orig.HETTA);
+  // If same drop already rendered, only update inputs and badge — preserve focus
+  if(panel.dataset.drop===drop&&panel.classList.contains('open')){
+    const si=document.getElementById('sim-sun'),hi=document.getElementById('sim-het');
+    if(si&&document.activeElement!==si)si.value=sunVal;
+    if(hi&&document.activeElement!==hi)hi.value=hetVal;
+    updateSimBadge();
+    return;
+  }
+  panel.dataset.drop=drop;
+  panel.classList.add('open');
+  panel.innerHTML=`<div class="sim-inner">
+    <span class="sim-label">&#128197; Simulate Launch — ${DROP_LABELS[drop]}</span>
+    <span class="sim-brand-label sun">Sundays launch:</span>
+    <input type="date" class="sim-date-input" id="sim-sun" value="${sunVal}" oninput="setSim('SUNDAYS',this.value)">
+    <span class="sim-brand-label het">Hetta launch:</span>
+    <input type="date" class="sim-date-input" id="sim-het" value="${hetVal}" oninput="setSim('HETTA',this.value)">
+    <button class="sim-reset-btn" onclick="resetSim()">&#8635; Reset to original</button>
+    ${changed?'<span class="sim-active-badge">Simulating</span>':''}
+  </div>`;
+}
 
 // ── render CALENDAR ───────────────────────────────────────────────────────────
 function renderCalendar(){
@@ -525,7 +619,7 @@ function renderCalendar(){
   const byDate={};
   DROPS.filter(d=>state.overlapDrops[d]).forEach(d=>{
     (getDropData(d)||[]).forEach(row=>{
-      [[getSunDate(row),'SUNDAYS'],[getHetDate(row),'HETTA']].forEach(([dt,br])=>{
+      [[getSunDate(row,d),'SUNDAYS'],[getHetDate(row,d),'HETTA']].forEach(([dt,br])=>{
         if(!dt)return;
         if(state.overlapBrand!=='BOTH'&&state.overlapBrand!==br)return;
         const ddt=new Date(dt);if(isNaN(ddt))return;
@@ -603,6 +697,7 @@ function render(){
   }else if(tab==='CALENDAR'){
     ti.innerHTML=toolbarCalendar();vc.innerHTML=renderCalendar();
   }
+  renderSimPanel();
 }
 
 // ── init ──────────────────────────────────────────────────────────────────────
